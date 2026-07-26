@@ -5,19 +5,22 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on mount
-    const checkAuth = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
+    // Auto Login: check localStorage for token and user on mount
+    const checkAuth = () => {
+      const storedToken = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      if (storedToken && storedUser) {
         try {
-          const response = await api.get('/auth/me');
-          setUser(response.data.user);
+          setToken(storedToken);
+          setUser(JSON.parse(storedUser));
         } catch (error) {
-          console.error('Auth check failed:', error);
+          console.error('Failed to restore auth state:', error);
           localStorage.removeItem('token');
+          localStorage.removeItem('user');
         }
       }
       setLoading(false);
@@ -26,43 +29,97 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
+    setLoading(true);
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { token, user: userData } = response.data;
-      localStorage.setItem('token', token);
+      const { token: jwtToken, user: userData } = response.data;
+
+      // Save token and user in localStorage
+      localStorage.setItem('token', jwtToken);
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      setToken(jwtToken);
       setUser(userData);
+      setLoading(false);
       return { success: true, user: userData };
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Login failed. Please try again.' 
+      setLoading(false);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Login failed. Invalid credentials.'
       };
     }
   };
 
   const register = async (userData) => {
+    setLoading(true);
     try {
-      const response = await api.post('/auth/register', userData);
-      const { token, user: registeredUser } = response.data;
-      localStorage.setItem('token', token);
-      setUser(registeredUser);
-      return { success: true, user: registeredUser };
+      // 1. Call registration endpoint
+      await api.post('/auth/register', userData);
+      
+      // 2. Automatically log in after registration to retrieve JWT token
+      const loginResult = await login(userData.email, userData.password);
+      return loginResult;
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Registration failed. Please try again.' 
+      setLoading(false);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Registration failed. Please try again.'
       };
     }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setToken(null);
     setUser(null);
     window.location.href = '/login';
   };
 
+  const loginWithToken = (jwtToken, userData) => {
+    localStorage.setItem('token', jwtToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setToken(jwtToken);
+    setUser(userData);
+    setLoading(false);
+  };
+
+  // Refresh user data in state + localStorage (used after admin approval check)
+  const refreshUser = (updatedUser) => {
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+  };
+
+  const isAuthenticated = () => {
+    return !!token && !!user;
+  };
+
+  const getCurrentUser = () => {
+    return user;
+  };
+
+  const getUserRole = () => {
+    return user?.role || null;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        login,
+        register,
+        loginWithToken,
+        logout,
+        refreshUser,
+        isAuthenticated,
+        getCurrentUser,
+        getUserRole,
+        setLoading
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

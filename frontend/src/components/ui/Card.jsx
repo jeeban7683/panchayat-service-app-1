@@ -2,13 +2,20 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const Card = ({ children, className = '', hover = false, ...props }) => {
-  const baseClasses = "bg-slate-800 rounded-xl border border-slate-700 shadow-sm overflow-hidden";
-  const hoverClasses = hover ? "hover:border-slate-600 hover:bg-slate-800/80 transition-all duration-300" : "";
-  
+  const baseStyle = {
+    background: '#14181F',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: '1rem',
+    overflow: 'hidden',
+    boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
+  };
+
   return (
-    <motion.div 
-      className={`${baseClasses} ${hoverClasses} ${className}`}
-      whileHover={hover ? { y: -4 } : {}}
+    <motion.div
+      className={className}
+      style={baseStyle}
+      whileHover={hover ? { y: -4, borderColor: 'rgba(244,180,0,0.25)' } : {}}
+      transition={{ duration: 0.2 }}
       {...props}
     >
       {children}

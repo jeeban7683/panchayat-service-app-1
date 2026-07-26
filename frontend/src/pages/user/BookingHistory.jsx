@@ -1,132 +1,183 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Calendar, Clock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Search, Loader2 } from 'lucide-react';
 import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
+import { getUserBookings } from '../../services/bookingService';
 
-const MOCK_BOOKINGS = [];
-
-const getStatusColor = (status) => {
+const getStatusStyle = (status) => {
   switch (status) {
-    case 'COMPLETED': return 'bg-green-500/10 text-green-400 border-green-500/20';
-    case 'PENDING': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-    case 'CANCELLED': return 'bg-red-500/10 text-red-400 border-red-500/20';
-    default: return 'bg-slate-700 text-slate-400 border-slate-600';
+    case 'COMPLETED':
+      return { bg: 'rgba(52,211,153,0.12)', color: '#34D399', border: 'rgba(52,211,153,0.3)' };
+    case 'PENDING':
+      return { bg: 'rgba(244,180,0,0.12)', color: '#F4B400', border: 'rgba(244,180,0,0.3)' };
+    case 'REJECTED':
+    case 'CANCELLED':
+      return { bg: 'rgba(239,68,68,0.12)', color: '#F87171', border: 'rgba(239,68,68,0.3)' };
+    case 'ACCEPTED':
+      return { bg: 'rgba(96,165,250,0.12)', color: '#60A5FA', border: 'rgba(96,165,250,0.3)' };
+    default:
+      return { bg: 'rgba(255,255,255,0.05)', color: '#9099A8', border: 'rgba(255,255,255,0.1)' };
   }
 };
 
 const BookingHistory = () => {
+  // TEMP FIX
+  const user = { id: 6 };
+  const authLoading = false;
+
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
-  const filteredBookings = MOCK_BOOKINGS.filter(b => {
-    const matchesSearch = b.service.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          b.provider.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'ALL' || b.status === statusFilter;
+  useEffect(() => {
+    const fetchBookings = async () => {
+      console.log("Fetching bookings for user:", user);
+      if (user?.id) {
+        try {
+          const response = await getUserBookings(user.id);
+          console.log("Bookings received:", response.data);
+          setBookings(response.data);
+        } catch (error) {
+          console.error('Failed to fetch bookings:', error);
+        } finally {
+          setLoading(false);
+        }
+      } else if (!authLoading) {
+        console.log("No user found");
+        setLoading(false);
+      }
+    };
+    fetchBookings();
+  }, []);
+
+  const filteredBookings = bookings.filter(b => {
+    const providerName = b.provider?.user?.name || '';
+    const serviceName = b.service?.name || '';
+
+    const matchesSearch =
+      serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      providerName.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === 'ALL' || b.status === statusFilter;
+
     return matchesSearch && matchesStatus;
   });
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4 text-[#9099A8]">
+        <Loader2 className="w-10 h-10 text-[#F4B400] animate-spin" />
+        <p className="text-sm font-medium">Loading your booking history...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="max-w-6xl mx-auto space-y-8 py-8 px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Booking History</h1>
-          <p className="text-slate-400 mt-1">View and manage your service bookings.</p>
+          <h1 className="text-3xl font-black text-white tracking-tight">
+            Booking History
+          </h1>
+          <p className="text-[#9099A8] text-sm mt-1">
+            View and manage your service bookings.
+          </p>
         </div>
 
         <div className="flex flex-col sm:flex-row w-full md:w-auto gap-4">
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-            <input 
-              type="text" 
-              placeholder="Search bookings..." 
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9099A8] w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search bookings..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-blue-500/50 outline-none text-sm"
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl text-white placeholder-[#4B5563] outline-none transition-all text-sm font-medium"
+              style={{ background: '#1A1F28', border: '1px solid rgba(255,255,255,0.08)' }}
+              onFocus={e => { e.target.style.borderColor = '#F4B400'; e.target.style.boxShadow = '0 0 0 3px rgba(244,180,0,0.12)'; }}
+              onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }}
             />
-          </div>
-          <div className="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
-            {['ALL', 'PENDING', 'COMPLETED'].map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-4 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                  statusFilter === status
-                    ? 'bg-slate-700 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                {status.charAt(0) + status.slice(1).toLowerCase()}
-              </button>
-            ))}
           </div>
         </div>
       </div>
 
       <div className="space-y-4">
         {filteredBookings.length === 0 ? (
-          <div className="text-center py-16 bg-slate-800 rounded-xl border border-slate-700">
-            <h3 className="text-lg font-medium text-white">No bookings found</h3>
-            <p className="text-slate-500 mt-2">Try adjusting your filters or search term.</p>
+          <div
+            className="text-center py-16 rounded-2xl text-[#9099A8] font-medium"
+            style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            No bookings found
           </div>
         ) : (
-          filteredBookings.map((booking, idx) => (
-            <motion.div
-              key={booking.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: idx * 0.1 }}
-            >
-              <Card className="p-4 sm:p-6 hover:border-slate-600 transition-all">
-                <div className="flex flex-col sm:flex-row gap-6">
-                  <div className="flex items-center gap-4 shrink-0 sm:w-64">
-                    <img 
-                      src={booking.image} 
-                      alt={booking.provider} 
-                      className="w-16 h-16 rounded-full object-cover ring-2 ring-slate-700"
-                    />
-                    <div>
-                      <h3 className="font-bold text-white">{booking.provider}</h3>
-                      <p className="text-sm font-medium text-blue-400">{booking.service}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-slate-400">
-                        <Calendar className="w-4 h-4" />
-                        {booking.date}
+          filteredBookings.map((booking, idx) => {
+            const s = getStatusStyle(booking.status);
+            return (
+              <motion.div
+                key={booking.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: idx * 0.05 }}
+              >
+                <div
+                  className="p-5 sm:p-6 rounded-2xl transition-all duration-300"
+                  style={{
+                    background: '#14181F',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(244,180,0,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                >
+                  <div className="flex flex-col sm:flex-row gap-5 items-start">
+                    <div className="flex items-center gap-4 shrink-0">
+                      <div
+                        className="w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-black text-[#F4B400]"
+                        style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.2)' }}
+                      >
+                        {booking.provider?.user?.name?.charAt(0) || 'P'}
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-slate-400">
-                        <Clock className="w-4 h-4" />
-                        {booking.time}
+                      <div>
+                        <h3 className="font-bold text-white">
+                          {booking.provider?.user?.name}
+                        </h3>
+                        <p className="text-xs font-bold text-[#F4B400] uppercase tracking-wide">
+                          {booking.service?.name}
+                        </p>
                       </div>
                     </div>
 
-                    <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
-                      <span className={`px-3 py-1 rounded-full border text-xs font-bold ${getStatusColor(booking.status)}`}>
-                        {booking.status}
-                      </span>
-                      <span className="font-bold text-lg text-white">{booking.amount}</span>
+                    <div
+                      className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm mt-3 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 w-full"
+                      style={{ borderColor: 'rgba(255,255,255,0.07)' }}
+                    >
+                      <div>
+                        <span className="text-[10px] font-bold text-[#9099A8] uppercase tracking-wider block">Requirements</span>
+                        <p className="text-[#C9CED6] font-medium mt-0.5">{booking.requirements || 'None specified'}</p>
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-[#9099A8] uppercase tracking-wider block">Service Address</span>
+                        <p className="text-[#C9CED6] font-medium mt-0.5">{booking.address}</p>
+                      </div>
+                      <div className="flex justify-between sm:justify-start items-center sm:items-start gap-4">
+                        <div>
+                          <span className="text-[10px] font-bold text-[#9099A8] uppercase tracking-wider block">Date & Time</span>
+                          <p className="text-white font-bold mt-0.5">{booking.date} at {booking.time}</p>
+                        </div>
+                        <span
+                          className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap"
+                          style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}
+                        >
+                          {booking.status}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="flex sm:flex-col gap-3 justify-center shrink-0 border-t sm:border-t-0 sm:border-l border-slate-700 pt-4 sm:pt-0 sm:pl-6">
-                    <Link to={`/user/bookings/${booking.id}`} className="flex-1 sm:flex-none">
-                      <Button variant="outline" className="w-full">Details</Button>
-                    </Link>
-                    {booking.status === 'COMPLETED' && (
-                      <Button className="flex-1 sm:flex-none">Leave Review</Button>
-                    )}
-                    {booking.status === 'PENDING' && (
-                      <Button variant="danger" className="flex-1 sm:flex-none">Cancel</Button>
-                    )}
                   </div>
                 </div>
-              </Card>
-            </motion.div>
-          ))
+              </motion.div>
+            );
+          })
         )}
       </div>
     </div>

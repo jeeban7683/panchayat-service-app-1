@@ -7,16 +7,19 @@ const MOCK_REVIEWS = [];
 
 const UserReviews = () => {
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 py-8 px-4 sm:px-6 lg:px-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">My Reviews</h1>
-        <p className="text-slate-400 mt-1">Manage the reviews you've written for service providers.</p>
+        <h1 className="text-3xl font-black text-white tracking-tight">My Reviews</h1>
+        <p className="text-[#9099A8] text-sm mt-1">Manage the reviews you've written for service providers.</p>
       </div>
 
       <div className="space-y-4">
         {MOCK_REVIEWS.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-slate-500">You haven't written any reviews yet.</p>
+          <div
+            className="text-center py-16 rounded-2xl"
+            style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <p className="text-[#9099A8] font-semibold text-sm">You haven't written any reviews yet.</p>
           </div>
         ) : (
           MOCK_REVIEWS.map((review, idx) => (
@@ -24,18 +27,18 @@ const UserReviews = () => {
               key={review.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: idx * 0.1 }}
+              transition={{ duration: 0.3, delay: idx * 0.05 }}
             >
-              <Card className="p-6">
+              <Card className="p-6" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-4">
-                    <img src={review.image} alt={review.provider} className="w-12 h-12 rounded-full object-cover border-2 border-slate-700" />
+                    <img src={review.image} alt={review.provider} className="w-12 h-12 rounded-full object-cover border border-white/10" />
                     <div>
                       <h3 className="font-bold text-white">{review.provider}</h3>
-                      <p className="text-sm text-slate-400">{review.service} • {review.date}</p>
+                      <p className="text-xs text-[#9099A8] font-semibold">{review.service} • {review.date}</p>
                     </div>
                   </div>
-                  <button className="text-slate-400 hover:text-white transition-colors">
+                  <button className="text-[#9099A8] hover:text-white transition-colors">
                     <MoreVertical className="w-5 h-5" />
                   </button>
                 </div>
@@ -44,17 +47,17 @@ const UserReviews = () => {
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star 
                       key={star} 
-                      className={`w-4 h-4 ${star <= review.rating ? 'fill-yellow-500 text-yellow-500' : 'fill-slate-700 text-slate-700'}`} 
+                      className={`w-4 h-4 ${star <= review.rating ? 'fill-[#FBBF24] text-[#FBBF24]' : 'fill-white/10 text-white/10'}`} 
                     />
                   ))}
                 </div>
                 
-                <p className="text-slate-300 leading-relaxed">
+                <p className="text-[#C9CED6] leading-relaxed text-sm italic">
                   "{review.text}"
                 </p>
                 
-                <div className="mt-4 pt-4 border-t border-slate-700 text-sm">
-                  <Link to={`/providers/${review.provider}`} className="text-blue-400 font-medium hover:underline">
+                <div className="mt-4 pt-4 border-t text-sm" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+                  <Link to={`/providers/${review.provider}`} className="text-[#F4B400] font-bold hover:underline">
                     View Provider Profile
                   </Link>
                 </div>

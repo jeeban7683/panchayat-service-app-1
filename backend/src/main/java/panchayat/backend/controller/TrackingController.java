@@ -7,7 +7,9 @@ import panchayat.backend.service.ProviderTrackingService;
 
 @RestController
 @RequestMapping("/api/tracking")
+@CrossOrigin(origins = "http://localhost:5173")
 public class TrackingController {
+
 
     @Autowired
     private ProviderTrackingService service;

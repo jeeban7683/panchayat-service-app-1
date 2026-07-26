@@ -8,6 +8,8 @@ import panchayat.backend.repository.BookingRepository;
 
 import java.util.List;
 
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+
 @Service
 public class BookingService {
 
@@ -52,7 +54,15 @@ public class BookingService {
     }
     // 🔥 Advanced: only pending requests
     public List<Booking> getProviderPendingBookings(Long providerId){
-        return repo.findByProviderIdAndStatus(providerId, BookingStatus.PENDING.name());
+        return repo.findByProviderIdAndStatus(providerId, BookingStatus.PENDING);
     }
 
+    public Booking getBookingById(Long id) {
+        return repo.findById(id).orElseThrow(() -> new RuntimeException("Booking not found"));
+    }
+
+    public List<Booking> getAllBookings() {
+        return repo.findAll();
+    }
 }
+

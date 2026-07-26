@@ -1,136 +1,310 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, Wallet, CheckCircle2, Navigation, Star, Clock, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Calendar,
+  Wallet,
+  CheckCircle2,
+  Navigation,
+  Clock,
+  HeadphonesIcon
+} from 'lucide-react';
+
 import api from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
 
 export default function UserDashboard() {
-  const { user } = useAuth();
-  const [stats, setStats] = useState([
-    { title: 'Total Bookings', value: '0', icon: Calendar, color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
-    { title: 'Total Spent', value: '₹0', icon: Wallet, color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
-    { title: 'Completed', value: '0', icon: CheckCircle2, color: 'text-green-400 bg-green-500/10 border-green-500/20' },
-  ]);
+  const navigate = useNavigate();
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [recentServices, setRecentServices] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // CHANGE THIS LATER AFTER AUTH
+  const userId = 6;
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await api.get('/user/dashboard');
-        const { stats: statsData, recentServices: services } = response.data;
-        
-        setStats([
-          { title: 'Total Bookings', value: statsData.totalBookings, icon: Calendar, color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
-          { title: 'Total Spent', value: `₹${statsData.totalSpent}`, icon: Wallet, color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
-          { title: 'Completed', value: statsData.completedBookings, icon: CheckCircle2, color: 'text-green-400 bg-green-500/10 border-green-500/20' },
-        ]);
-        
-        setRecentServices(services);
-      } catch (error) {
-        console.error('Failed to fetch user dashboard data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchUserData();
+    fetchBookings();
   }, []);
 
+  const fetchBookings = async () => {
+    try {
+      const response = await api.get(`/bookings/user/${userId}`);
+      console.log(response.data);
+      setBookings(response.data);
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // STATS
+  const totalBookings = bookings.length;
+
+  const completedBookings = bookings.filter(
+    booking => booking.status === 'COMPLETED'
+  ).length;
+
+  const totalSpent = bookings.reduce(
+    (total, booking) => total + (booking.provider?.price || 0),
+    0
+  );
+
+  // ACTIVE BOOKING
+  const activeBooking = bookings.find(
+    booking =>
+      booking.status === 'PENDING' ||
+      booking.status === 'ACCEPTED' ||
+      booking.status === 'IN_PROGRESS'
+  );
+
+  const getStatusBadge = (status) => {
+    const map = {
+      PENDING: { bg: 'rgba(244,180,0,0.12)', color: '#F4B400', border: 'rgba(244,180,0,0.3)' },
+      ACCEPTED: { bg: 'rgba(96,165,250,0.12)', color: '#60A5FA', border: 'rgba(96,165,250,0.3)' },
+      IN_PROGRESS: { bg: 'rgba(167,139,250,0.12)', color: '#A78BFA', border: 'rgba(167,139,250,0.3)' },
+      COMPLETED: { bg: 'rgba(52,211,153,0.12)', color: '#34D399', border: 'rgba(52,211,153,0.3)' },
+      REJECTED: { bg: 'rgba(239,68,68,0.12)', color: '#F87171', border: 'rgba(239,68,68,0.3)' },
+    };
+    return map[status] || map.PENDING;
+  };
+
   return (
-    <div className="max-w-7xl mx-auto w-full">
-      <div className="flex justify-between items-center mb-8">
+    <div className="max-w-7xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-500 to-blue-600 tracking-wide pb-1">
-            Welcome back{user?.firstName ? `, ${user.firstName}` : ''}
+          <h1 className="text-3xl font-black text-white tracking-tight">
+            Welcome Back
           </h1>
-          <p className="text-slate-400 mt-1 font-medium">Here's what's happening with your account today.</p>
+          <p className="text-[#9099A8] text-sm mt-1">
+            Here's what's happening with your account today.
+          </p>
         </div>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-500 transition">
-          New Booking
+        <button
+          onClick={() => navigate('/user/chat?role=ADMIN')}
+          className="flex items-center gap-2 px-4 py-2.5 text-black text-sm font-bold rounded-xl hover:-translate-y-0.5 active:scale-95 transition-all shadow-lg shrink-0"
+          style={{ background: 'linear-gradient(135deg, #F4B400 0%, #FFC928 100%)' }}
+        >
+          <HeadphonesIcon className="w-4 h-4" />
+          Contact Admin
         </button>
       </div>
 
+      {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {stats.map((stat, i) => (
-          <div key={i} className="bg-slate-800 rounded-xl shadow-sm border border-slate-700 p-6 flex flex-col">
-            <div className={`w-12 h-12 rounded-lg border ${stat.color} flex items-center justify-center mb-4`}>
-              <stat.icon className="w-6 h-6" />
-            </div>
-            <h3 className="text-3xl font-bold text-white mb-1">{stat.value}</h3>
-            <p className="text-slate-400 text-sm font-medium">{stat.title}</p>
+        {/* TOTAL BOOKINGS */}
+        <div
+          className="rounded-2xl p-6 flex items-center gap-5 transition-all duration-300 hover:-translate-y-1"
+          style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+        >
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.2)' }}
+          >
+            <Calendar size={22} className="text-[#F4B400]" />
           </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-
-          <div className="bg-slate-800 rounded-xl shadow-sm border border-slate-700">
-            <div className="p-6 border-b border-slate-700">
-              <h3 className="text-lg font-bold text-white">Current Booking Status</h3>
-            </div>
-            <div className="p-8 flex flex-col items-center justify-center text-center">
-              <div className="w-16 h-16 bg-slate-800 border border-slate-700 rounded-full flex items-center justify-center mb-4">
-                <Navigation className="w-8 h-8 text-slate-600" />
-              </div>
-              <h4 className="font-bold text-white mb-2">No active bookings</h4>
-              <p className="text-slate-400 text-sm mb-4">You don't have any services currently in progress.</p>
-              <button className="text-blue-400 font-medium hover:text-white transition-colors">Browse Services &rarr;</button>
-            </div>
-          </div>
-
-          <div className="bg-slate-800 rounded-xl shadow-sm border border-slate-700 p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-bold text-white text-lg">Recent Services</h3>
-              <button className="text-sm text-blue-400 hover:text-white transition-colors font-medium">View All</button>
-            </div>
-            <div className="space-y-4">
-              {recentServices.length === 0 ? (
-                <div className="py-8 text-center text-slate-500 italic bg-slate-900/50 rounded-xl border border-slate-700">No recent services.</div>
-              ) : (
-                recentServices.map((_, i) => (
-                  <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-slate-900 border border-slate-700 hover:border-slate-600 hover:bg-slate-800 transition-colors">
-                    <div className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 shadow-sm flex items-center justify-center">
-                      <Star className="w-6 h-6 text-yellow-500" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white font-bold">Home Cleaning</p>
-                      <p className="text-sm text-slate-400">Completed 2 days ago</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-white font-bold">${120 - i * 15}</p>
-                      <p className="text-sm text-green-400 font-medium">Paid</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+          <div>
+            <h2 className="text-2xl font-black text-white">{totalBookings}</h2>
+            <p className="text-[#9099A8] text-xs font-bold uppercase tracking-wider mt-0.5">Total Bookings</p>
           </div>
         </div>
 
-        <div className="bg-slate-800 rounded-xl shadow-sm border border-slate-700 p-6 self-start">
-          <h3 className="font-bold text-white mb-6 text-lg">Booking Timeline</h3>
-          <div className="relative">
-            <div className="absolute left-4 top-4 bottom-4 w-px bg-slate-700"></div>
-            {[
-              { title: 'Requested', desc: '10:00 AM', status: 'done' },
-              { title: 'Accepted', desc: '10:05 AM', status: 'done' },
-              { title: 'In Progress', desc: 'Working', status: 'current' },
-              { title: 'Completed', desc: 'Pending', status: 'upcoming' },
-            ].map((step, i) => (
-              <div key={i} className="relative flex items-start mb-6 last:mb-0">
-                <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center border-2 ${step.status === 'done' ? 'bg-slate-900 border-green-500 text-green-400' :
-                  step.status === 'current' ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.5)]' :
-                    'bg-slate-900 border-slate-700 text-slate-500'
-                  }`}>
-                  {step.status === 'done' ? <CheckCircle2 className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+        {/* TOTAL SPENT */}
+        <div
+          className="rounded-2xl p-6 flex items-center gap-5 transition-all duration-300 hover:-translate-y-1"
+          style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+        >
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)' }}
+          >
+            <Wallet size={22} className="text-[#60A5FA]" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-white">₹{totalSpent}</h2>
+            <p className="text-[#9099A8] text-xs font-bold uppercase tracking-wider mt-0.5">Total Spent</p>
+          </div>
+        </div>
+
+        {/* COMPLETED */}
+        <div
+          className="rounded-2xl p-6 flex items-center gap-5 transition-all duration-300 hover:-translate-y-1"
+          style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+        >
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.2)' }}
+          >
+            <CheckCircle2 size={22} className="text-[#34D399]" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-white">{completedBookings}</h2>
+            <p className="text-[#9099A8] text-xs font-bold uppercase tracking-wider mt-0.5">Completed</p>
+          </div>
+        </div>
+      </div>
+
+      {/* MAIN GRID */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* LEFT */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* ACTIVE BOOKING */}
+          <div
+            className="rounded-2xl overflow-hidden"
+            style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <div className="p-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+              <h3 className="text-lg font-bold text-white">
+                Current Booking Status
+              </h3>
+            </div>
+
+            <div className="p-6">
+              {activeBooking ? (
+                <div
+                  className="rounded-xl p-5"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                >
+                  <h3 className="text-lg font-black text-white mb-1.5">
+                    {activeBooking.service?.name}
+                  </h3>
+                  <p className="text-[#C9CED6] text-sm mb-3">
+                    {activeBooking.requirements}
+                  </p>
+                  <div className="space-y-1.5 text-xs text-[#9099A8]">
+                    <p>📍 {activeBooking.address}</p>
+                    <p>📅 {activeBooking.date}</p>
+                  </div>
+
+                  <div className="mt-4">
+                    {(() => {
+                      const s = getStatusBadge(activeBooking.status);
+                      return (
+                        <span
+                          className="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider"
+                          style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}
+                        >
+                          {activeBooking.status}
+                        </span>
+                      );
+                    })()}
+                  </div>
                 </div>
-                <div className="ml-4 mt-0.5">
-                  <h4 className={`font-bold ${step.status === 'upcoming' ? 'text-slate-500' : 'text-white'}`}>{step.title}</h4>
-                  <p className="text-sm text-slate-400">{step.desc}</p>
+              ) : (
+                <div className="text-center py-10">
+                  <Navigation className="mx-auto text-[#9099A8] mb-4" size={40} />
+                  <h3 className="text-lg font-bold text-white mb-1">
+                    No Active Bookings
+                  </h3>
+                  <p className="text-[#9099A8] text-sm">
+                    You don't have any active bookings right now.
+                  </p>
                 </div>
+              )}
+            </div>
+          </div>
+
+          {/* RECENT BOOKINGS */}
+          <div
+            className="rounded-2xl p-6"
+            style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <h3 className="text-lg font-bold text-white mb-5">
+              Recent Bookings
+            </h3>
+
+            {loading ? (
+              <div className="text-center py-8 text-sm text-[#9099A8]">
+                Loading...
               </div>
-            ))}
+            ) : bookings.length === 0 ? (
+              <div className="text-center py-8 text-sm text-[#9099A8]">
+                No bookings found
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {bookings.map((booking) => {
+                  const s = getStatusBadge(booking.status);
+                  return (
+                    <div
+                      key={booking.id}
+                      className="rounded-xl p-4 flex justify-between items-start gap-4 transition-all duration-200 hover:border-[#F4B400]/20"
+                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                    >
+                      <div>
+                        <h4 className="text-sm font-bold text-white">
+                          {booking.service?.name}
+                        </h4>
+                        <p className="text-[#9099A8] text-xs mt-1">
+                          {booking.requirements}
+                        </p>
+                        <div className="space-y-0.5 text-[11px] text-[#9099A8] mt-2.5">
+                          <p>📍 {booking.address}</p>
+                          <p>📅 {booking.date}</p>
+                        </div>
+                      </div>
+                      <div>
+                        <span
+                          className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap"
+                          style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}
+                        >
+                          {booking.status}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div
+          className="rounded-2xl p-6 h-fit"
+          style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+        >
+          <h3 className="text-lg font-bold text-white mb-5">
+            Booking Timeline
+          </h3>
+
+          <div className="space-y-5">
+            {[
+              'PENDING',
+              'ACCEPTED',
+              'IN_PROGRESS',
+              'COMPLETED'
+            ].map((step, index) => {
+              const exists = bookings.some(
+                booking => booking.status === step
+              );
+              const s = getStatusBadge(step);
+
+              return (
+                <div key={index} className="flex items-center gap-4">
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center border shrink-0"
+                    style={exists ? {
+                      background: s.bg,
+                      borderColor: s.border,
+                      color: s.color,
+                    } : {
+                      background: 'rgba(255,255,255,0.03)',
+                      borderColor: 'rgba(255,255,255,0.1)',
+                      color: '#9099A8',
+                    }}
+                  >
+                    <Clock size={16} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white">
+                      {step}
+                    </h4>
+                    <p className="text-[#9099A8] text-xs">
+                      {exists ? 'Completed' : 'Pending'}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

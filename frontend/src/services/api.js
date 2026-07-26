@@ -9,10 +9,9 @@ const api = axios.create({
   },
 });
 
-// Request Interceptor
+// Request Interceptor: Attach bearer token if present
 api.interceptors.request.use(
   (config) => {
-    // You can attach auth tokens here
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -24,20 +23,33 @@ api.interceptors.request.use(
   }
 );
 
-// Response Interceptor
+// Response Interceptor: Handle 401 Unauthorized
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    // Handle global errors (e.g., 401 Unauthorized)
     if (error.response && error.response.status === 401) {
-      // Clear token and redirect to login
+      // Clear authentication details
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      localStorage.removeItem('user');
+      
+      // Redirect to login page with expired flag to display session expired message
+      window.location.href = '/login?expired=true';
     }
     return Promise.reject(error);
   }
 );
+
+export const getImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+    return path;
+  }
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+  const origin = baseUrl.replace(/\/api\/?$/, '');
+  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+  return `${origin}/${cleanPath}`;
+};
 
 export default api;

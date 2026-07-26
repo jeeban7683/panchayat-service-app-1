@@ -6,94 +6,127 @@ import {
   Star,
   MapPin,
   CheckCircle,
-  Clock,
   ChevronDown,
   Loader2,
 } from 'lucide-react';
+
 import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import api from '../../services/api';
+import GlowButton from '../../components/ui/GlowButton';
+import api, { getImageUrl } from '../../services/api';
+
+import { useSearchParams } from 'react-router-dom';
 
 const ProviderListing = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [providers, setProviders] = useState([]);
+  const [ratings, setRatings] = useState({});   // { [providerId]: avgRating }
   const [isLoading, setIsLoading] = useState(true);
+  const [searchParams] = useSearchParams();
 
-  // Fetch providers from backend
+  const serviceFilter = searchParams.get('service');
+
   useEffect(() => {
-    const fetchProviders = async () => {
-      try {
-        // Correct backend endpoint
-        const response = await api.get('/providers/verified');
-
-        console.log('Providers API Response:', response.data);
-
-        // Ensure response is always an array
-        setProviders(Array.isArray(response.data) ? response.data : []);
-      } catch (error) {
-        console.error('Failed to fetch providers:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchProviders();
   }, []);
 
-  // Filter by provider name or service name
-  const filteredProviders = providers.filter((p) => {
-    const name = p.user?.name || '';
-    const service = p.service?.name || '';
+  const fetchProviders = async () => {
+    try {
+      const response = await api.get('/providers/verified');
+      const data = Array.isArray(response.data) ? response.data : [];
+      console.log('Providers API Response:', data);
+      setProviders(data);
 
-    return (
-      name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+      // Fetch average rating for every provider in parallel
+      const ratingResults = await Promise.allSettled(
+        data.map((p) =>
+          api
+            .get(`/reviews/provider/${p.id}/rating`)
+            .then((res) => ({ id: p.id, rating: res.data }))
+        )
+      );
+
+      const ratingsMap = {};
+      ratingResults.forEach((result) => {
+        if (result.status === 'fulfilled' && result.value.rating !== null && result.value.rating !== undefined) {
+          ratingsMap[result.value.id] = result.value.rating;
+        }
+      });
+      console.log('Ratings Map:', ratingsMap);
+      setRatings(ratingsMap);
+    } catch (error) {
+      console.error('Failed to fetch providers:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredProviders = providers.filter((p) => {
+    const providerName = p.user?.name || '';
+    const providerService = p.service?.name || '';
+
+    const matchesSearch =
+      providerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      providerService.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesService = serviceFilter
+      ? providerService.toLowerCase().replace(/\s+/g, '-') === serviceFilter.toLowerCase()
+      : true;
+
+    return matchesSearch && matchesService;
   });
 
   return (
-    <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
-      {/* Header & Search Area */}
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto" style={{ background: '#000000' }}>
+      {/* HEADER */}
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">
+            <h1 className="text-3xl font-black text-white mb-2 tracking-tight">
               Available Providers
             </h1>
-            <p className="text-slate-400">
+            <p className="text-[#9099A8] font-medium">
               Find the right professional for your needs
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Search Box */}
+            {/* SEARCH */}
             <div className="relative flex-1 md:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9099A8] w-[18px] h-[18px]" />
               <input
                 type="text"
                 placeholder="Search providers or services..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-500"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl text-white placeholder:text-[#4B5563] outline-none transition-all text-sm font-medium"
+                style={{ background: '#1A1F28', border: '1px solid rgba(255,255,255,0.08)' }}
+                onFocus={e => { e.target.style.borderColor = '#F4B400'; e.target.style.boxShadow = '0 0 0 3px rgba(244,180,0,0.12)'; }}
+                onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }}
               />
             </div>
 
-            {/* Filters Button */}
+            {/* FILTER BUTTON */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`p-2.5 rounded-xl border transition-all flex items-center gap-2 ${showFilters
-                  ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]'
-                  : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
-                }`}
+              className="px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm font-bold"
+              style={showFilters ? {
+                background: '#F4B400',
+                border: '1px solid #F4B400',
+                color: '#000',
+              } : {
+                background: '#14181F',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: '#C9CED6',
+              }}
             >
-              <Filter className="w-5 h-5" />
-              <span className="hidden sm:inline font-medium">Filters</span>
+              <Filter className="w-4 h-4" />
+              <span className="hidden sm:inline">Filters</span>
             </button>
           </div>
         </div>
 
-        {/* Expandable Filter Panel */}
+        {/* FILTER PANEL */}
         <AnimatePresence>
           {showFilters && (
             <motion.div
@@ -102,136 +135,59 @@ const ProviderListing = () => {
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden mb-8"
             >
-              <Card className="p-6 border-blue-500/20 bg-slate-800/50 backdrop-blur-sm">
+              <div
+                className="rounded-2xl p-6"
+                style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+              >
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-                  {/* Categories */}
+                  {/* CATEGORIES */}
                   <div>
-                    <h4 className="font-bold text-white mb-4 flex items-center gap-2">
-                      <ChevronDown className="w-4 h-4 text-blue-400" />
+                    <h4 className="font-bold text-white mb-4 flex items-center gap-2 text-sm">
+                      <ChevronDown className="w-4 h-4 text-[#F4B400]" />
                       Categories
                     </h4>
                     <div className="grid grid-cols-2 gap-2">
                       {[
-                        'Plumbing',
-                        'Electrical',
-                        'Carpentry',
-                        'Cleaning',
-                        'Painting',
-                        'AC Repair',
+                        'Plumber',
+                        'Electrician',
+                        'RO Repair',
+                        'Carpenter',
+                        'Cleaner',
                       ].map((cat) => (
                         <label
                           key={cat}
                           className="flex items-center gap-3 cursor-pointer group"
                         >
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500/50"
-                          />
-                          <span className="text-sm text-slate-400 group-hover:text-white transition-colors">
+                          <span className="text-sm text-[#9099A8] group-hover:text-[#F4B400] transition-colors">
                             {cat}
                           </span>
                         </label>
                       ))}
                     </div>
                   </div>
-
-                  {/* Rating */}
-                  <div>
-                    <h4 className="font-bold text-white mb-4 flex items-center gap-2">
-                      <ChevronDown className="w-4 h-4 text-blue-400" />
-                      Minimum Rating
-                    </h4>
-                    <div className="space-y-3">
-                      {[4, 3, 2].map((rating) => (
-                        <label
-                          key={rating}
-                          className="flex items-center gap-3 cursor-pointer group"
-                        >
-                          <input
-                            type="radio"
-                            name="rating"
-                            className="w-4 h-4 border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500/50"
-                          />
-                          <div className="flex items-center text-sm text-slate-400 group-hover:text-white transition-colors">
-                            <div className="flex gap-0.5 mr-2">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-3.5 h-3.5 ${i < rating
-                                      ? 'fill-yellow-500 text-yellow-500'
-                                      : 'text-slate-700'
-                                    }`}
-                                />
-                              ))}
-                            </div>
-                            {rating}.0 & up
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Availability */}
-                  <div>
-                    <h4 className="font-bold text-white mb-4 flex items-center gap-2">
-                      <ChevronDown className="w-4 h-4 text-blue-400" />
-                      Availability
-                    </h4>
-                    <div className="space-y-3">
-                      <label className="flex items-center gap-3 cursor-pointer group">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500/50"
-                        />
-                        <span className="text-sm text-slate-400 group-hover:text-white transition-colors">
-                          Available Now
-                        </span>
-                      </label>
-                      <label className="flex items-center gap-3 cursor-pointer group">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500/50"
-                        />
-                        <span className="text-sm text-slate-400 group-hover:text-white transition-colors">
-                          Verified Only
-                        </span>
-                      </label>
-                    </div>
-                  </div>
                 </div>
-
-                <div className="mt-6 pt-6 border-t border-slate-700/50 flex justify-end gap-3">
-                  <button
-                    onClick={() => setShowFilters(false)}
-                    className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors"
-                  >
-                    Clear All
-                  </button>
-                  <Button
-                    variant="primary"
-                    onClick={() => setShowFilters(false)}
-                    className="px-6 py-2 text-sm"
-                  >
-                    Apply Filters
-                  </Button>
-                </div>
-              </Card>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Provider Cards */}
+      {/* PROVIDERS */}
       <div className="space-y-6">
         {isLoading ? (
-          <div className="py-20 flex flex-col items-center justify-center text-slate-500 bg-slate-800/50 rounded-2xl border border-slate-700/50 italic">
-            <Loader2 className="w-8 h-8 animate-spin mb-4 text-blue-500" />
-            <p>Loading professionals...</p>
+          <div
+            className="py-20 flex flex-col items-center justify-center text-[#9099A8] rounded-2xl"
+            style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <Loader2 className="w-8 h-8 animate-spin mb-4 text-[#F4B400]" />
+            <p className="text-sm font-medium">Loading professionals...</p>
           </div>
         ) : filteredProviders.length === 0 ? (
-          <div className="py-20 text-center bg-slate-800/50 rounded-2xl border border-slate-700/50 italic text-slate-500">
-            No providers found matching your criteria. Try adjusting your search
-            or filters.
+          <div
+            className="py-20 text-center rounded-2xl text-[#9099A8] font-medium"
+            style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            No providers found matching your criteria.
           </div>
         ) : (
           filteredProviders.map((provider, idx) => {
@@ -240,99 +196,116 @@ const ProviderListing = () => {
             const price = provider.price || 0;
             const experience = provider.experience || 0;
             const verified = provider.verified ?? false;
-            const profileImage =
-              provider.profileImage ||
-              'https://images.unsplash.com/photo-1540565993045-303545f8226d?q=80&w=200&auto=format&fit=crop';
             const address = provider.address || 'Bhubaneswar';
-            const rating = provider.rating || 'N/A';
+
+            // Real average rating from reviews API
+            const avgRating = ratings[provider.id];
+            const ratingDisplay = avgRating != null && avgRating > 0
+              ? Number(avgRating).toFixed(1)
+              : '0.0';
+
+            const profileImage = provider.profileImage
+              ? getImageUrl(provider.profileImage)
+              : `https://ui-avatars.com/api/?name=${encodeURIComponent(providerName)}&background=F4B400&color=000&size=256`;
 
             return (
               <motion.div
                 key={provider.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
+                transition={{ duration: 0.35, delay: idx * 0.05 }}
               >
-                <Card className="p-5 sm:p-6 hover:border-blue-500/30 transition-all group overflow-hidden relative">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[50px] -mr-16 -mt-16 group-hover:bg-blue-500/10 transition-all" />
-
-                  <div className="flex flex-col sm:flex-row gap-6 relative z-10">
-                    {/* Avatar */}
+                <div
+                  className="rounded-2xl p-5 sm:p-6 transition-all duration-300 group"
+                  style={{
+                    background: '#14181F',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = 'rgba(244,180,0,0.25)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 8px 32px rgba(244,180,0,0.08)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  <div className="flex flex-col sm:flex-row gap-6">
+                    {/* PROFILE */}
                     <div className="flex flex-col items-center gap-4 shrink-0">
                       <div className="relative">
                         <img
                           src={profileImage}
                           alt={providerName}
-                          className="w-24 h-24 rounded-2xl object-cover border-2 border-slate-800 shadow-xl"
+                          className="w-24 h-24 rounded-2xl object-cover shadow-lg"
+                          style={{ border: '2px solid rgba(244,180,0,0.2)' }}
                         />
-
                         {verified && (
-                          <div className="absolute -top-2 -right-2 bg-blue-600 p-1.5 rounded-lg border-2 border-slate-900 shadow-lg">
-                            <CheckCircle className="w-3.5 h-3.5 text-white" />
+                          <div
+                            className="absolute -top-1.5 -right-1.5 p-1 rounded-full border-2 shadow-sm"
+                            style={{ background: '#F4B400', borderColor: '#14181F' }}
+                          >
+                            <CheckCircle className="w-3.5 h-3.5 text-black" />
                           </div>
                         )}
                       </div>
-
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Online
-                      </span>
                     </div>
 
-                    {/* Details */}
+                    {/* DETAILS */}
                     <div className="flex-1">
                       <div className="flex flex-col md:flex-row justify-between gap-6">
                         <div>
-                          <h2 className="text-2xl font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">
+                          <h2 className="text-xl font-bold text-white mb-0.5 group-hover:text-[#F4B400] transition-colors">
                             {providerName}
                           </h2>
-
-                          <p className="text-blue-500 font-semibold mb-4 flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                          <p className="text-sm font-bold text-[#F4B400] mb-4 flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#F4B400]" />
                             {serviceName}
                           </p>
 
-                          <div className="flex flex-wrap items-center gap-6 text-sm text-slate-400">
-                            <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700/50">
-                              <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                              <span className="font-bold text-white">
-                                {rating}
-                              </span>
+                          <div className="flex flex-wrap items-center gap-4 text-sm">
+                            <div
+                              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold"
+                              style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.25)', color: '#F4B400' }}
+                            >
+                              <Star className="w-3.5 h-3.5 fill-[#F4B400] text-[#F4B400]" />
+                              <span>{ratingDisplay}</span>
                             </div>
-
-                            <div className="flex items-center gap-2">
-                              <MapPin className="w-4 h-4 text-slate-500" />
+                            <div className="flex items-center gap-1.5 text-[#9099A8]">
+                              <MapPin className="w-4 h-4 text-[#9099A8]" />
                               {address}
                             </div>
-
-                            <div className="text-slate-400">
-                              {experience} years experience
+                            <div className="text-[#9099A8]">
+                              {experience} yr{experience !== 1 ? 's' : ''} experience
                             </div>
                           </div>
                         </div>
 
-                        {/* Price + Button */}
-                        <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center border-t md:border-t-0 md:border-l border-slate-800 pt-4 md:pt-0 md:pl-8 shrink-0">
-                          <div className="mb-0 md:mb-4">
-                            <div className="text-2xl font-black text-white">
-                              ₹{price}
-                            </div>
-                            <div className="text-xs text-slate-500 font-medium uppercase tracking-widest text-right">
+                        {/* PRICE */}
+                        <div
+                          className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-8 shrink-0 gap-4"
+                          style={{ borderColor: 'rgba(255,255,255,0.07)' }}
+                        >
+                          <div className="text-center md:text-right">
+                            <div className="text-2xl font-black text-white">₹{price}</div>
+                            <div className="text-[10px] text-[#9099A8] font-medium uppercase tracking-wider mt-0.5">
                               starting price
                             </div>
                           </div>
-
-                          <Button
+                          <GlowButton
                             variant="primary"
-                            className="shadow-[0_0_20px_rgba(37,99,235,0.2)] hover:shadow-[0_0_30px_rgba(37,99,235,0.4)]"
+                            href={`/providers/${provider.id}`}
+                            className="text-sm px-5 py-2.5"
                           >
                             View Profile
-                          </Button>
+                          </GlowButton>
                         </div>
                       </div>
                     </div>
                   </div>
-                </Card>
+                </div>
               </motion.div>
             );
           })

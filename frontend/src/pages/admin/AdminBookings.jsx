@@ -1,122 +1,273 @@
-import { useState } from 'react';
-import { Search, Filter, Calendar, Clock, CreditCard, FileText, MapPin, User, Briefcase } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import {
+  Search, Calendar, Clock, User, Briefcase,
+  Loader2, AlertTriangle, RefreshCw, CalendarCheck, CalendarX,
+  CheckCircle2, Timer
+} from 'lucide-react';
+import api from '../../services/api';
 import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
+import GlowButton from '../../components/ui/GlowButton';
 
-const MOCK_BOOKINGS = [];
+// ── Status Badge ─────────────────────────────────────────────────────────────
+const StatusBadge = ({ status }) => {
+  const map = {
+    PENDING:     'bg-[#F4B400]/10 text-[#FBBF24] border-[#F4B400]/25',
+    ACCEPTED:    'bg-blue-500/10 text-[#60A5FA] border-blue-500/25',
+    IN_PROGRESS: 'bg-purple-500/10 text-purple-400 border-purple-500/25 animate-pulse',
+    COMPLETED:   'bg-green-500/10 text-[#34D399] border-green-500/25',
+    REJECTED:    'bg-red-500/10 text-[#F87171] border-red-500/25',
+    CANCELLED:   'bg-white/5 text-[#9099A8] border-white/10',
+  };
+  return (
+    <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase border tracking-wider ${map[status] || 'bg-white/5 text-gray-400 border-white/10'}`}>
+      {(status || '—').replace('_', ' ')}
+    </span>
+  );
+};
 
 const AdminBookings = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [bookings,     setBookings]     = useState([]);
+  const [isLoading,    setIsLoading]    = useState(true);
+  const [error,        setError]        = useState(null);
+  const [searchTerm,   setSearchTerm]   = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const filteredBookings = MOCK_BOOKINGS.filter(booking => 
-    booking.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    booking.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    booking.provider.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // ── Fetch ─────────────────────────────────────────────────────────────────────
+  const fetchBookings = useCallback(async (silent = false) => {
+    if (!silent) setIsLoading(true);
+    setError(null);
+    try {
+      const res = await api.get('/bookings');
+      setBookings(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error('Failed to fetch bookings:', err);
+      if (!silent) setError('Failed to load bookings. Is the backend running?');
+    } finally {
+      if (!silent) setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchBookings(); }, [fetchBookings]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchBookings(true);
+    setIsRefreshing(false);
+  };
+
+  // ── Filter ────────────────────────────────────────────────────────────────────
+  const filtered = bookings.filter(b => {
+    const q = searchTerm.toLowerCase();
+    return (
+      String(b.id).includes(q) ||
+      (b.user?.name || '').toLowerCase().includes(q) ||
+      (b.provider?.user?.name || '').toLowerCase().includes(q) ||
+      (b.service?.name || '').toLowerCase().includes(q) ||
+      (b.status || '').toLowerCase().includes(q)
+    );
+  });
+
+  // ── Counts ────────────────────────────────────────────────────────────────────
+  const counts = {
+    total:     bookings.length,
+    pending:   bookings.filter(b => b.status === 'PENDING').length,
+    active:    bookings.filter(b => ['ACCEPTED', 'IN_PROGRESS'].includes(b.status)).length,
+    completed: bookings.filter(b => b.status === 'COMPLETED').length,
+  };
+
+  // ── Loading ───────────────────────────────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-[#9099A8] font-medium">
+        <div className="relative">
+          <div className="w-20 h-20 border-2 border-[#F4B400]/20 border-t-[#F4B400] rounded-full animate-spin" />
+          <Loader2 className="w-8 h-8 text-[#F4B400] animate-pulse absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+        </div>
+        <p className="text-sm font-semibold">Loading bookings...</p>
+      </div>
+    );
+  }
+
+  // ── Error ─────────────────────────────────────────────────────────────────────
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center px-6 text-white">
+        <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center">
+          <AlertTriangle className="w-8 h-8 text-red-400" />
+        </div>
+        <h3 className="text-xl font-bold text-white">Failed to load bookings</h3>
+        <p className="text-[#9099A8] text-sm max-w-sm font-semibold">{error}</p>
+        <GlowButton onClick={() => fetchBookings()} variant="primary" className="px-6 py-2.5 text-sm font-bold">
+          Try Again
+        </GlowButton>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6 pb-12 py-8 px-4 sm:px-6 lg:px-8">
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black text-white">Live Operations</h1>
-          <p className="text-slate-400 mt-1">Track active services, time-at-location, and financial settlements.</p>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.2)' }}>
+              <CalendarCheck className="w-5 h-5 text-[#F4B400]" />
+            </div>
+            <h1 className="text-3xl font-black text-white tracking-tight">Live Operations</h1>
+          </div>
+          <p className="text-[#9099A8] text-sm font-semibold ml-13">Track active services and booking management.</p>
         </div>
-        <div className="flex gap-3 w-full md:w-auto">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-            <input 
-              type="text" 
-              placeholder="Search by ID, User or Provider..." 
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9099A8] w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search by ID, user, provider or service..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-blue-500/50 outline-none text-sm"
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl text-white placeholder-[#4B5563] outline-none transition-all text-sm font-medium"
+              style={{ background: '#1A1F28', border: '1px solid rgba(255,255,255,0.08)' }}
+              onFocus={e => { e.target.style.borderColor = '#F4B400'; e.target.style.boxShadow = '0 0 0 3px rgba(244,180,0,0.12)'; }}
+              onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }}
             />
           </div>
-          <Button variant="outline" className="shrink-0 border-slate-700"><Filter className="w-4 h-4 mr-2" /> Filter</Button>
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm font-bold shrink-0 disabled:opacity-50"
+            style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)', color: '#9099A8' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#9099A8'; e.currentTarget.style.background = '#14181F'; }}
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
         </div>
       </div>
 
-      <Card className="overflow-hidden border-slate-700/50">
+      {/* Stats Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="rounded-2xl p-5 flex items-center gap-4" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.15)' }}>
+            <CalendarCheck className="w-5 h-5 text-[#F4B400]" />
+          </div>
+          <div>
+            <p className="text-2xl font-black text-white">{counts.total}</p>
+            <p className="text-[10px] text-[#9099A8] font-bold uppercase tracking-wider mt-0.5">Total Bookings</p>
+          </div>
+        </div>
+        <div className="rounded-2xl p-5 flex items-center gap-4" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.15)' }}>
+            <Clock className="w-5 h-5 text-[#F4B400]" />
+          </div>
+          <div>
+            <p className="text-2xl font-black text-white">{counts.pending}</p>
+            <p className="text-[10px] text-[#9099A8] font-bold uppercase tracking-wider mt-0.5">Pending</p>
+          </div>
+        </div>
+        <div className="rounded-2xl p-5 flex items-center gap-4" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.15)' }}>
+            <Timer className="w-5 h-5 text-[#F4B400]" />
+          </div>
+          <div>
+            <p className="text-2xl font-black text-white">{counts.active}</p>
+            <p className="text-[10px] text-[#9099A8] font-bold uppercase tracking-wider mt-0.5">Active</p>
+          </div>
+        </div>
+        <div className="rounded-2xl p-5 flex items-center gap-4" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.15)' }}>
+            <CheckCircle2 className="w-5 h-5 text-[#34D399]" />
+          </div>
+          <div>
+            <p className="text-2xl font-black text-white">{counts.completed}</p>
+            <p className="text-[10px] text-[#9099A8] font-bold uppercase tracking-wider mt-0.5">Completed</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Table */}
+      <Card className="overflow-hidden" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1200px]">
+          <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
-              <tr className="bg-slate-900/80 text-slate-400 text-[10px] uppercase font-black tracking-[0.2em] border-b border-slate-700">
-                <th className="px-6 py-5 font-semibold">Booking ID</th>
-                <th className="px-6 py-5 font-semibold">Client & Service</th>
-                <th className="px-6 py-5 font-semibold">Professional</th>
-                <th className="px-6 py-5 font-semibold text-center">Status</th>
-                <th className="px-6 py-5 font-semibold">Time Monitor</th>
-                <th className="px-6 py-5 font-semibold">Financials</th>
-                <th className="px-6 py-5 font-semibold text-right">Settlement</th>
+              <tr className="text-[#9099A8] text-[10px] uppercase font-bold tracking-wider border-b" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
+                <th className="px-6 py-5">Booking ID</th>
+                <th className="px-6 py-5">Client & Service</th>
+                <th className="px-6 py-5">Provider</th>
+                <th className="px-6 py-5 text-center">Status</th>
+                <th className="px-6 py-5">Schedule</th>
+                <th className="px-6 py-5">Address</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 bg-slate-900/20">
-               {filteredBookings.length === 0 ? (
+            <tbody className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+              {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center text-slate-500 font-medium italic">
-                    No bookings found matching your search.
+                  <td colSpan="6" className="px-6 py-16 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <CalendarX className="w-7 h-7 text-[#9099A8]" />
+                      </div>
+                      <p className="text-[#9099A8] text-sm font-semibold">
+                        {searchTerm ? `No bookings match "${searchTerm}"` : 'No bookings found yet.'}
+                      </p>
+                    </div>
                   </td>
                 </tr>
               ) : (
-                filteredBookings.map((booking) => (
-                  <tr key={booking.id} className="hover:bg-slate-800/40 transition-all group">
+                filtered.map((booking, i) => (
+                  <motion.tr
+                    key={booking.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.02 }}
+                    className="hover:bg-white/5 transition-colors group"
+                  >
                     <td className="px-6 py-5">
-                      <span className="font-black text-blue-500 text-sm">{booking.id}</span>
-                      <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                        <Calendar className="w-3 h-3" /> {booking.date}
-                      </div>
+                      <span className="font-black text-[#F4B400] text-sm">#{booking.id}</span>
                     </td>
                     <td className="px-6 py-5">
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2 font-bold text-white mb-1">
-                          <User className="w-3.5 h-3.5 text-slate-500" /> {booking.customer}
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-2 font-bold text-white text-sm">
+                          <User className="w-3.5 h-3.5 text-[#9099A8]" /> {booking.user?.name || '—'}
                         </div>
-                        <div className="text-xs text-blue-400 font-bold bg-blue-500/10 px-2 py-0.5 rounded w-fit border border-blue-500/20 uppercase tracking-tighter">
-                          {booking.service}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5">
-                      <div className="flex items-center gap-2 font-bold text-slate-300">
-                        <Briefcase className="w-3.5 h-3.5 text-slate-500" /> {booking.provider}
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 text-center">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase border tracking-wider ${
-                        booking.status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
-                        booking.status === 'IN_PROGRESS' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse' :
-                        booking.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                        'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                      }`}>
-                        {booking.status.replace('_', ' ')}
-                      </span>
-                    </td>
-                    <td className="px-6 py-5">
-                      <div className="flex items-center gap-2 text-sm font-bold text-white">
-                        <Clock className="w-4 h-4 text-slate-500" /> {booking.timeSpent}
-                      </div>
-                      <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Total at User House</div>
-                    </td>
-                    <td className="px-6 py-5">
-                      <div className="flex flex-col">
-                        <span className="font-black text-white text-base">{booking.amount}</span>
-                        <span className={`text-[10px] font-black uppercase tracking-widest mt-1 ${
-                          booking.payment === 'RECEIVED' ? 'text-emerald-400' : 'text-amber-500'
-                        }`}>
-                          {booking.payment}
+                        <span className="text-[10px] text-[#FBBF24] font-bold bg-[#F4B400]/10 px-2.5 py-0.5 rounded border border-[#F4B400]/25 uppercase tracking-wider w-fit">
+                          {booking.service?.name || '—'}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-5 text-right">
-                      {booking.receipt ? (
-                        <button className="inline-flex items-center gap-2 bg-slate-800 px-3 py-2 rounded-xl text-blue-400 hover:text-white border border-slate-700 hover:border-blue-500 transition-all font-bold text-xs">
-                          <FileText className="w-4 h-4" /> View Receipt
-                        </button>
-                      ) : (
-                        <span className="text-slate-600 text-xs font-bold uppercase tracking-widest italic">In Progress</span>
-                      )}
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-2 font-bold text-white text-sm">
+                        <Briefcase className="w-3.5 h-3.5 text-[#9099A8]" />
+                        {booking.provider?.user?.name || '—'}
+                      </div>
                     </td>
-                  </tr>
+                    <td className="px-6 py-5 text-center">
+                      <StatusBadge status={booking.status} />
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex flex-col gap-1">
+                        {booking.date && (
+                          <div className="flex items-center gap-1.5 text-sm text-[#C9CED6] font-semibold">
+                            <Calendar className="w-3.5 h-3.5 text-[#9099A8]" /> {booking.date}
+                          </div>
+                        )}
+                        {booking.time && (
+                          <div className="flex items-center gap-1.5 text-xs text-[#9099A8] font-medium">
+                            <Clock className="w-3 h-3 text-[#9099A8]/60" /> {booking.time}
+                          </div>
+                        )}
+                        {!booking.date && !booking.time && (
+                          <span className="text-xs text-[#9099A8] italic font-semibold">Not set</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className="text-xs text-[#C9CED6] font-semibold max-w-[200px] truncate block">
+                        {booking.address || '—'}
+                      </span>
+                    </td>
+                  </motion.tr>
                 ))
               )}
             </tbody>

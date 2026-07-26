@@ -1,336 +1,653 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, CheckCircle, XCircle, Eye, MapPin, Phone, Mail, DollarSign, Clock, Briefcase, X, TrendingUp, Users, Activity, Star } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart as ReBarChart, Bar } from 'recharts';
+import {
+  CheckCircle,
+  XCircle,
+  Loader2,
+  UserCheck,
+  Briefcase,
+  Clock,
+  DollarSign,
+  AlertTriangle,
+  RefreshCw,
+  ShieldCheck,
+  Users,
+  Search,
+  X,
+  Mail,
+  Phone,
+  CheckCircle2,
+  AlertCircle
+} from 'lucide-react';
+import api from '../../services/api';
+import GlowButton from '../../components/ui/GlowButton';
 import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
 
-const MOCK_PROVIDERS = [];
+// ─── Stat Card ───────────────────────────────────────────────────────────────
+const StatCard = ({ icon: Icon, label, value, style }) => (
+  <div className="rounded-2xl p-5 flex items-center gap-4" style={style}>
+    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <Icon className="w-5 h-5" />
+    </div>
+    <div>
+      <p className="text-2xl font-black">{value}</p>
+      <p className="text-[10px] opacity-60 font-bold uppercase tracking-wider mt-0.5">{label}</p>
+    </div>
+  </div>
+);
 
-const ANALYTICS_DATA = [];
-
-const AdminProviders = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [selectedProvider, setSelectedProvider] = useState(null);
-  const [activeModal, setActiveModal] = useState(null); // 'ANALYTICS' or 'REPORT'
-
-  const filteredProviders = MOCK_PROVIDERS.filter(provider => {
-    const matchesSearch = provider.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          provider.service.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'ALL' || provider.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const openModal = (provider, type) => {
-    setSelectedProvider(provider);
-    setActiveModal(type);
-  };
-
-  const closeModal = () => {
-    setSelectedProvider(null);
-    setActiveModal(null);
-  };
+// ─── Provider Card ────────────────────────────────────────────────────────────
+const ProviderCard = ({ provider, onVerify, onReject, actionLoading, onClickDetails }) => {
+  const providerName = provider.user?.name || provider.name || 'Unknown Provider';
+  const serviceName  = provider.service?.name || 'Unknown Service';
+  const experience   = provider.experience ?? '—';
+  const price        = provider.price ?? provider.hourlyRate ?? '—';
+  const initials     = providerName.charAt(0).toUpperCase();
+  const isLoading    = actionLoading === provider.id;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-white">Provider Monitoring</h1>
-          <p className="text-slate-400 mt-1">Real-time oversight of service professionals and earnings.</p>
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.98, y: -10 }}
+      transition={{ duration: 0.25 }}
+      onClick={() => onClickDetails(provider)}
+      className="rounded-2xl p-6 transition-all group relative overflow-hidden cursor-pointer"
+      style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+    >
+      <div className="relative z-10 flex flex-col sm:flex-row items-start gap-5">
+        {/* Avatar */}
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shrink-0" style={{ background: '#F4B400', color: '#000' }}>
+          {initials}
         </div>
-        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-            <input 
-              type="text" 
-              placeholder="Search providers..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-blue-500/50 outline-none text-sm"
-            />
+
+        {/* Details */}
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <h3 className="text-lg font-bold text-white group-hover:text-[#F4B400] transition-colors truncate">{providerName}</h3>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#F4B400]/10 text-[#FBBF24] border border-[#F4B400]/25">
+              <Clock className="w-2.5 h-2.5" /> Pending Approval
+            </span>
           </div>
-          <div className="flex bg-slate-800 p-1 rounded-xl border border-slate-700 shadow-inner">
-            {['ALL', 'PENDING', 'VERIFIED'].map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                  statusFilter === status
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                {status.charAt(0) + status.slice(1).toLowerCase()}
-              </button>
-            ))}
+
+          <div className="flex flex-wrap gap-4 mt-3 text-xs text-[#9099A8] font-semibold">
+            <span className="flex items-center gap-1.5">
+              <Briefcase className="w-3.5 h-3.5 text-[#F4B400]" />
+              <span className="text-[#C9CED6]">{serviceName}</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <UserCheck className="w-3.5 h-3.5 text-purple-450" />
+              <span>{experience} yrs experience</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <DollarSign className="w-3.5 h-3.5 text-[#34D399]" />
+              <span>₹{price} / hr</span>
+            </span>
           </div>
+
+          <div className="flex items-center gap-3 mt-3">
+            {provider.user?.email && (
+              <span className="text-xs text-[#9099A8] flex items-center gap-1 font-medium">
+                <Mail className="w-3 h-3 text-[#9099A8]/60" /> {provider.user.email}
+              </span>
+            )}
+            {provider.user?.phone && (
+              <span className="text-xs text-[#9099A8] flex items-center gap-1 font-medium">
+                <Phone className="w-3 h-3 text-[#9099A8]/60" /> {provider.user.phone}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2 shrink-0 mt-2 sm:mt-0" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={() => onVerify(provider.id)}
+            disabled={isLoading}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ background: 'rgba(52,211,153,0.1)', color: '#34D399', border: '1px solid rgba(52,211,153,0.25)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#10B981'; e.currentTarget.style.color = '#fff'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(52,211,153,0.1)'; e.currentTarget.style.color = '#34D399'; }}
+          >
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <CheckCircle className="w-4 h-4" />
+            )}
+            Verify
+          </button>
+          <button
+            onClick={() => onReject(provider.id)}
+            disabled={isLoading}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ background: 'rgba(239,68,68,0.1)', color: '#F87171', border: '1px solid rgba(239,68,68,0.25)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#EF4444'; e.currentTarget.style.color = '#fff'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.color = '#F87171'; }}
+          >
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <XCircle className="w-4 h-4" />
+            )}
+            Reject
+          </button>
         </div>
       </div>
+    </motion.div>
+  );
+};
 
-      <Card className="overflow-hidden border-slate-700/50">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1100px]">
-            <thead>
-              <tr className="bg-slate-900/80 text-slate-400 text-[10px] uppercase font-black tracking-[0.2em] border-b border-slate-700">
-                <th className="px-6 py-5 font-semibold">Provider & Contact</th>
-                <th className="px-6 py-5 font-semibold text-center">Status</th>
-                <th className="px-6 py-5 font-semibold">Live Tracking</th>
-                <th className="px-6 py-5 font-semibold">Total Revenue</th>
-                <th className="px-6 py-5 font-semibold text-right">Monitoring Hub</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800 bg-slate-900/20">
-              {filteredProviders.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-slate-500 font-medium italic">
-                    No providers found matching your criteria.
-                  </td>
-                </tr>
-              ) : (
-                filteredProviders.map((provider) => (
-                  <tr key={provider.id} className="hover:bg-slate-800/40 transition-all group">
-                    <td className="px-6 py-5">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center font-bold text-blue-400 border border-slate-700 group-hover:border-blue-500/50 transition-all">
-                          {provider.name[0]}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-white text-base group-hover:text-blue-400 transition-colors">{provider.name}</span>
-                          <div className="flex items-center gap-3 mt-1 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                            <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" /> {provider.service}</span>
-                            <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {provider.phone}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 text-center">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase border tracking-wider ${
-                        provider.status === 'VERIFIED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 
-                        provider.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                        'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                      }`}>
-                        {provider.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-5">
-                      <div className="flex items-center gap-2.5">
-                        <div className={`w-2 h-2 rounded-full ${
-                          provider.location === 'Active Now' ? 'bg-emerald-500 animate-pulse' : 
-                          provider.location === 'At User House' ? 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'bg-slate-700'
-                        }`} />
-                        <span className={`text-sm font-bold ${
-                          provider.location === 'Active Now' ? 'text-emerald-400' : 
-                          provider.location === 'At User House' ? 'text-blue-400' : 'text-slate-500'
-                        }`}>
-                          {provider.location}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5">
-                      <div className="text-white font-black text-base">{provider.earnings}</div>
-                      <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Platform Revenue</div>
-                    </td>
-                    <td className="px-6 py-5 text-right">
-                      <div className="flex items-center justify-end gap-3">
-                        <button 
-                          onClick={() => openModal(provider, 'ANALYTICS')}
-                          className="bg-slate-800 p-2.5 rounded-xl text-slate-400 hover:text-blue-400 border border-slate-700 hover:border-blue-500/50 transition-all shadow-sm group/btn" 
-                          title="Live Analytics"
-                        >
-                          <Activity className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
-                        </button>
-                        <button 
-                          onClick={() => openModal(provider, 'REPORT')}
-                          className="bg-slate-800 p-2.5 rounded-xl text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 transition-all shadow-sm group/btn" 
-                          title="View Full Report"
-                        >
-                          <Eye className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+// ─── Details Modal Overlay ──────────────────────────────────────────────────
+const DetailsModal = ({ provider, onClose, onVerify, onReject, actionLoading }) => {
+  if (!provider) return null;
 
-      {/* Monitoring Modal Overlay */}
-      <AnimatePresence>
-        {activeModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={closeModal}
-              className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
-            />
-            
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-4xl bg-slate-900 border border-slate-700 rounded-[2.5rem] shadow-2xl overflow-hidden"
-            >
-              <div className="p-8 border-b border-slate-800 flex justify-between items-center bg-slate-800/20">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-xl font-black text-white shadow-lg shadow-blue-600/20">
-                    {selectedProvider?.name[0]}
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-black text-white">{selectedProvider?.name}</h2>
-                    <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">{activeModal === 'ANALYTICS' ? 'Real-time Analytics' : 'Professional Report'}</p>
-                  </div>
-                </div>
-                <button onClick={closeModal} className="p-3 hover:bg-slate-800 rounded-2xl text-slate-400 hover:text-white transition-all">
-                  <X className="w-6 h-6" />
-                </button>
+  const providerName = provider.user?.name || provider.name || 'Unknown Provider';
+  const serviceName  = provider.service?.name || 'Unknown Service';
+  const experience   = provider.experience ?? '—';
+  const price        = provider.price ?? provider.hourlyRate ?? '—';
+  const email        = provider.user?.email || 'N/A';
+  const phone        = provider.user?.phone || 'N/A';
+  const initials     = providerName.charAt(0).toUpperCase();
+  const isLoading    = actionLoading === provider.id;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-black/60 backdrop-blur-md"
+      />
+
+      {/* Modal Box */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="relative w-full max-w-2xl border rounded-3xl overflow-hidden shadow-2xl z-10 text-white"
+        style={{ background: '#11151B', borderColor: 'rgba(255,255,255,0.08)' }}
+      >
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 text-[#9099A8] hover:text-white p-2 rounded-xl transition-all z-20"
+          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Body Content */}
+        <div className="p-8 relative z-10">
+          
+          {/* Main Title & Avatar */}
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black" style={{ background: '#F4B400', color: '#000' }}>
+              {initials}
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="text-2xl font-black text-white">{providerName}</h2>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#F4B400]/10 text-[#FBBF24] border border-[#F4B400]/25">
+                  <Clock className="w-2.5 h-2.5" /> Pending
+                </span>
               </div>
-
-              <div className="p-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                {activeModal === 'ANALYTICS' ? (
-                  <div className="space-y-8">
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="bg-slate-800/40 p-6 rounded-3xl border border-slate-700/50">
-                        <TrendingUp className="w-6 h-6 text-emerald-400 mb-4" />
-                        <div className="text-2xl font-black text-white">₹{selectedProvider?.earnings}</div>
-                        <div className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Net Revenue</div>
-                      </div>
-                      <div className="bg-slate-800/40 p-6 rounded-3xl border border-slate-700/50">
-                        <Users className="w-6 h-6 text-blue-400 mb-4" />
-                        <div className="text-2xl font-black text-white">42</div>
-                        <div className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Total Bookings</div>
-                      </div>
-                      <div className="bg-slate-800/40 p-6 rounded-3xl border border-slate-700/50">
-                        <Star className="w-6 h-6 text-amber-400 mb-4" />
-                        <div className="text-2xl font-black text-white">{selectedProvider?.rating || 'N/A'}</div>
-                        <div className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Customer Satisfaction</div>
-                      </div>
-                    </div>
-
-                    {/* Revenue Chart */}
-                    <div className="bg-slate-800/40 p-8 rounded-3xl border border-slate-700/50 h-[350px]">
-                      <h4 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-blue-500" /> Revenue Growth (Last 7 Days)
-                      </h4>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={ANALYTICS_DATA}>
-                          <defs>
-                            <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                          <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                          <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val}`} />
-                          <Tooltip 
-                            contentStyle={{ backgroundColor: '#0f172a', borderRadius: '16px', border: '1px solid #334155', color: '#fff' }}
-                            itemStyle={{ color: '#3b82f6', fontWeight: 'bold' }}
-                          />
-                          <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-6">
-                      <div className="p-6 bg-slate-800/30 rounded-3xl border border-slate-700/50">
-                        <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-blue-500" /> Contact Details
-                        </h4>
-                        <div className="space-y-4">
-                          <div className="flex justify-between items-center">
-                            <span className="text-slate-500 text-xs font-bold uppercase">Mobile</span>
-                            <span className="text-white font-bold">{selectedProvider?.phone}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-slate-500 text-xs font-bold uppercase">Email</span>
-                            <span className="text-white font-bold">{selectedProvider?.email}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-slate-500 text-xs font-bold uppercase">Work Area</span>
-                            <span className="text-white font-bold">Mumbai South</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="p-6 bg-slate-800/30 rounded-3xl border border-slate-700/50">
-                        <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
-                          <ShieldCheck className="w-4 h-4 text-emerald-500" /> Compliance Status
-                        </h4>
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                              <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
-                            </div>
-                            <span className="text-white text-sm">Aadhar Verified</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                              <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
-                            </div>
-                            <span className="text-white text-sm">Bank Details Verified</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center">
-                              <div className="w-2 h-2 rounded-full bg-slate-600" />
-                            </div>
-                            <span className="text-slate-500 text-sm italic">Insurance Renewal Pending</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-6">
-                      <h4 className="text-sm font-black text-white uppercase tracking-widest mb-4">Recent Feedback Monitoring</h4>
-                      {[
-                        { user: 'John D.', comment: 'Expert plumber, very punctual.', rating: 5, time: '2 days ago' },
-                        { user: 'Sarah M.', comment: 'Good work but arrived 15 mins late.', rating: 4, time: '1 week ago' },
-                        { user: 'Vikram R.', comment: 'Highly recommended for complex leaks.', rating: 5, time: '2 weeks ago' },
-                      ].map((review, i) => (
-                        <div key={i} className="p-4 bg-slate-800/20 rounded-2xl border border-slate-700/30">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-xs font-bold text-blue-400">{review.user}</span>
-                            <span className="text-[10px] text-slate-600 font-bold uppercase">{review.time}</span>
-                          </div>
-                          <p className="text-sm text-slate-400 mb-2 italic">"{review.comment}"</p>
-                          <div className="flex gap-0.5">
-                            {[...Array(5)].map((_, j) => (
-                              <Star key={j} className={`w-3 h-3 ${j < review.rating ? 'fill-yellow-500 text-yellow-500' : 'text-slate-700'}`} />
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="p-8 bg-slate-800/30 border-t border-slate-800 flex justify-between items-center">
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Generated by Panchayat Admin Core v1.2</p>
-                <div className="flex gap-3">
-                  <Button variant="outline" size="sm" className="border-slate-700" onClick={closeModal}>Close View</Button>
-                  {activeModal === 'REPORT' && <Button variant="primary" size="sm">Download Full PDF</Button>}
-                </div>
-              </div>
-            </motion.div>
+              <p className="text-[#9099A8] text-sm font-semibold">Professional profile verification application.</p>
+            </div>
           </div>
+
+          <hr className="mb-6" style={{ borderColor: 'rgba(255,255,255,0.07)' }} />
+
+          {/* Grid Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* Column Left: Job Info */}
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#9099A8] mb-1">Professional Details</h3>
+              
+              <div className="rounded-2xl p-4 space-y-3.5" style={{ background: '#1A1F28', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="flex justify-between items-center text-sm font-semibold">
+                  <span className="text-[#9099A8] flex items-center gap-1.5"><Briefcase className="w-4 h-4 text-[#F4B400]" /> Specialty</span>
+                  <span className="text-white font-bold">{serviceName}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm font-semibold">
+                  <span className="text-[#9099A8] flex items-center gap-1.5"><UserCheck className="w-4 h-4 text-purple-400" /> Experience</span>
+                  <span className="text-white font-bold">{experience} Years</span>
+                </div>
+                <div className="flex justify-between items-center text-sm font-semibold">
+                  <span className="text-[#9099A8] flex items-center gap-1.5"><DollarSign className="w-4 h-4 text-[#34D399]" /> Hourly Rate</span>
+                  <span className="text-[#34D399] font-black">₹{price} / hour</span>
+                </div>
+              </div>
+
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#9099A8] mb-1 mt-6">Contact details</h3>
+              <div className="rounded-2xl p-4 space-y-3" style={{ background: '#1A1F28', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="flex items-center gap-2.5 text-sm font-semibold text-[#C9CED6]">
+                  <Mail className="w-4 h-4 text-[#9099A8]" />
+                  <span className="truncate">{email}</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-sm font-semibold text-[#C9CED6]">
+                  <Phone className="w-4 h-4 text-[#9099A8]" />
+                  <span>{phone}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Column Right: Document Checklist */}
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#9099A8] mb-1">Document Checklist</h3>
+              
+              <div className="rounded-2xl p-4 space-y-3" style={{ background: '#1A1F28', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="flex items-center gap-3 text-sm text-[#C9CED6]">
+                  <CheckCircle2 className="w-5 h-5 text-[#34D399] shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-bold text-xs text-white">Professional License ID</p>
+                    <p className="text-[10px] text-[#9099A8] font-semibold">Verified Professional Registry</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 text-sm text-[#C9CED6]">
+                  <CheckCircle2 className="w-5 h-5 text-[#34D399] shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-bold text-xs text-white">Aadhaar Card / UID</p>
+                    <p className="text-[10px] text-[#9099A8] font-semibold">Identity and biometric match</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 text-sm text-[#C9CED6]">
+                  <CheckCircle2 className="w-5 h-5 text-[#34D399] shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-bold text-xs text-white">Local Address Proof</p>
+                    <p className="text-[10px] text-[#9099A8] font-semibold">Panchayat Area verified</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 text-sm text-[#C9CED6]">
+                  <CheckCircle2 className="w-5 h-5 text-[#34D399] shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-bold text-xs text-white">Police Clearance Cert</p>
+                    <p className="text-[10px] text-[#9099A8] font-semibold">Zero criminal record match</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl p-3.5 flex items-start gap-2.5" style={{ background: 'rgba(244,180,0,0.05)', border: '1px solid rgba(244,180,0,0.15)' }}>
+                <AlertCircle className="w-4 h-4 text-[#F4B400] mt-0.5 shrink-0" />
+                <p className="text-[10px] text-[#9099A8] font-semibold leading-normal">
+                  Verification ensures security and trust for our community. Clicking approve will immediately authorize this provider to accept bookings on our platform.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <hr className="my-6" style={{ borderColor: 'rgba(255,255,255,0.07)' }} />
+
+          {/* Action Row */}
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => {
+                onReject(provider.id);
+                onClose();
+              }}
+              disabled={isLoading}
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl transition-all font-bold text-sm disabled:opacity-50"
+              style={{ background: 'rgba(239,68,68,0.1)', color: '#F87171', border: '1px solid rgba(239,68,68,0.25)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#EF4444'; e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.color = '#F87171'; }}
+            >
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+              Reject Application
+            </button>
+            <GlowButton
+              onClick={() => {
+                onVerify(provider.id);
+                onClose();
+              }}
+              disabled={isLoading}
+              variant="primary"
+              className="flex items-center gap-2 px-6 py-3 text-sm font-bold shadow-md disabled:opacity-50"
+            >
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+              Approve & Verify
+            </GlowButton>
+          </div>
+
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+// ─── Toast Notification ───────────────────────────────────────────────────────
+const Toast = ({ message, type, onClose }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 50, scale: 0.9 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    exit={{ opacity: 0, y: 50, scale: 0.9 }}
+    className="fixed bottom-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-bold"
+    style={{
+      background: type === 'success' ? 'rgba(52,211,153,0.1)' : 'rgba(239,68,68,0.1)',
+      borderColor: type === 'success' ? 'rgba(52,211,153,0.25)' : 'rgba(239,68,68,0.25)',
+      color: type === 'success' ? '#34D399' : '#F87171'
+    }}
+  >
+    {type === 'success' ? (
+      <CheckCircle className="w-5 h-5 text-[#34D399] shrink-0" />
+    ) : (
+      <AlertTriangle className="w-5 h-5 text-[#F87171] shrink-0" />
+    )}
+    {message}
+    <button onClick={onClose} className="ml-2 opacity-60 hover:opacity-100 transition-opacity text-lg leading-none">×</button>
+  </motion.div>
+);
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
+const AdminProviders = () => {
+  const [providers, setProviders]                 = useState([]);
+  const [verifiedProviders, setVerifiedProviders] = useState([]);
+  const [isLoading, setIsLoading]                 = useState(true);
+  const [actionLoading, setActionLoading]         = useState(null); // provider id currently being acted on
+  const [searchTerm, setSearchTerm]               = useState('');
+  const [toast, setToast]                         = useState(null); // { message, type }
+  const [error, setError]                         = useState(null);
+  const [selectedProvider, setSelectedProvider]   = useState(null);
+
+  // ── Fetch pending providers ────────────────────────────────────────────────
+  const fetchPendingProviders = useCallback(async (silent = false) => {
+    if (!silent) setIsLoading(true);
+    setError(null);
+    try {
+      const response = await api.get('/providers/pending');
+      const data = Array.isArray(response.data) ? response.data : [];
+      setProviders(data.map(p => ({
+        ...p,
+        isVerified: p.isVerified ?? p.verified ?? false
+      })));
+    } catch (err) {
+      console.error('Failed to fetch pending providers:', err);
+      if (!silent) setError('Failed to load pending providers. Please try again.');
+    } finally {
+      if (!silent) setIsLoading(false);
+    }
+  }, []);
+
+  // ── Fetch verified providers ───────────────────────────────────────────────
+  const fetchVerifiedProviders = useCallback(async () => {
+    try {
+      const response = await api.get('/providers/verified');
+      const data = Array.isArray(response.data) ? response.data : [];
+      setVerifiedProviders(data.map(p => ({
+        ...p,
+        isVerified: p.isVerified ?? p.verified ?? true
+      })));
+    } catch (err) {
+      console.error('Failed to fetch verified providers:', err);
+    }
+  }, []);
+
+  // ── Initial load ───────────────────────────────────────────────────────────
+  useEffect(() => {
+    const initFetch = async () => {
+      setIsLoading(true);
+      await Promise.all([
+        fetchPendingProviders(true),
+        fetchVerifiedProviders()
+      ]);
+      setIsLoading(false);
+    };
+    initFetch();
+  }, [fetchPendingProviders, fetchVerifiedProviders]);
+
+  // ── Auto-dismiss toast ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  // ── Refresh handler ────────────────────────────────────────────────────────
+  const handleRefresh = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await Promise.all([
+        fetchPendingProviders(true),
+        fetchVerifiedProviders()
+      ]);
+    } catch (err) {
+      console.error('Refresh failed:', err);
+      setError('Failed to refresh data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchPendingProviders, fetchVerifiedProviders]);
+
+  // ── Verify handler ─────────────────────────────────────────────────────────
+  const handleVerify = async (id) => {
+    setActionLoading(id);
+    try {
+      await api.put(`/providers/${id}/verify`);
+      // Update local state first for instant UI response, then fetch fresh data
+      setProviders((prev) => prev.filter((p) => p.id !== id));
+      await Promise.all([
+        fetchPendingProviders(true),
+        fetchVerifiedProviders()
+      ]);
+      setToast({ message: 'Provider verified successfully!', type: 'success' });
+    } catch (err) {
+      console.error('Verify failed:', err);
+      setToast({ message: err.response?.data?.message || 'Verification failed. Try again.', type: 'error' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  // ── Reject handler ─────────────────────────────────────────────────────────
+  const handleReject = async (id) => {
+    setActionLoading(id);
+    try {
+      await api.delete(`/providers/${id}`);
+      // Update local state first for instant UI response, then fetch fresh data
+      setProviders((prev) => prev.filter((p) => p.id !== id));
+      await Promise.all([
+        fetchPendingProviders(true),
+        fetchVerifiedProviders()
+      ]);
+      setToast({ message: 'Provider rejected.', type: 'error' });
+    } catch (err) {
+      console.error('Reject failed:', err);
+      setToast({ message: err.response?.data?.message || 'Rejection failed. Try again.', type: 'error' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  // ── Filtered providers ─────────────────────────────────────────────────────
+  const filtered = providers.filter((p) => {
+    const name    = (p.user?.name || p.name || '').toLowerCase();
+    const service = (p.service?.name || '').toLowerCase();
+    const q       = searchTerm.toLowerCase();
+    return name.includes(q) || service.includes(q);
+  });
+
+  // ─── Render ────────────────────────────────────────────────────────────────
+  return (
+    <div className="max-w-5xl mx-auto space-y-8 pb-16 py-8 px-4 sm:px-6 lg:px-8">
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.2)' }}>
+              <ShieldCheck className="w-5 h-5 text-[#F4B400]" />
+            </div>
+            <h1 className="text-3xl font-black text-white tracking-tight">Provider Verification</h1>
+          </div>
+          <p className="text-[#9099A8] text-sm font-semibold ml-13">
+            Review and approve pending service providers before they go live. Click a provider card to view full details.
+          </p>
+        </div>
+
+        <button
+          onClick={handleRefresh}
+          disabled={isLoading}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm font-bold disabled:opacity-50 shrink-0"
+          style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)', color: '#9099A8' }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#9099A8'; e.currentTarget.style.background = '#14181F'; }}
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
+      </div>
+
+      {/* Stats Row */}
+      {!isLoading && !error && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatCard
+            icon={Clock}
+            label="Awaiting Review"
+            value={providers.filter(p => !p.isVerified).length}
+            style={{ background: 'rgba(244,180,0,0.05)', color: '#F4B400', border: '1px solid rgba(244,180,0,0.15)' }}
+          />
+          <StatCard
+            icon={Users}
+            label="Showing (filtered)"
+            value={filtered.length}
+            style={{ background: '#14181F', color: '#9099A8', border: '1px solid rgba(255,255,255,0.08)' }}
+          />
+          <StatCard
+            icon={CheckCircle}
+            label="Approved Today"
+            value={verifiedProviders.filter(p => p.isVerified).length}
+            style={{ background: 'rgba(52,211,153,0.05)', color: '#34D399', border: '1px solid rgba(52,211,153,0.15)' }}
+          />
+        </div>
+      )}
+
+      {/* Search */}
+      {!isLoading && !error && providers.length > 0 && (
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9099A8] w-4 h-4" />
+          <input
+            type="text"
+            placeholder="Search by name or service..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-11 pr-4 py-3 rounded-xl text-white placeholder-[#4B5563] outline-none transition-all text-sm font-medium shadow-sm"
+            style={{ background: '#1A1F28', border: '1px solid rgba(255,255,255,0.08)' }}
+            onFocus={e => { e.target.style.borderColor = '#F4B400'; e.target.style.boxShadow = '0 0 0 3px rgba(244,180,0,0.12)'; }}
+            onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }}
+          />
+        </div>
+      )}
+
+      {/* Content Area */}
+      {isLoading ? (
+        /* Loading State */
+        <div className="py-24 flex flex-col items-center justify-center rounded-2xl text-[#9099A8] font-medium" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="relative mb-6">
+            <div className="w-16 h-16 border-2 border-[#F4B400]/20 border-t-[#F4B400] rounded-full animate-spin" />
+            <Loader2 className="w-6 h-6 text-[#F4B400] animate-pulse absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+          </div>
+          <p className="text-sm font-semibold">Loading pending providers...</p>
+        </div>
+
+      ) : error ? (
+        /* Error State */
+        <div className="py-20 flex flex-col items-center justify-center rounded-2xl text-center px-6" style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.15)' }}>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
+            <AlertTriangle className="w-8 h-8 text-[#F87171]" />
+          </div>
+          <h3 className="text-lg font-bold text-white mb-2">Something went wrong</h3>
+          <p className="text-[#9099A8] mb-6 text-sm font-semibold">{error}</p>
+          <GlowButton
+            onClick={fetchPendingProviders}
+            variant="primary"
+            className="px-6 py-2.5 text-sm"
+          >
+            Try Again
+          </GlowButton>
+        </div>
+
+      ) : filtered.length === 0 ? (
+        /* Empty State */
+        <div className="py-24 flex flex-col items-center justify-center rounded-2xl text-center px-6" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'rgba(52,211,153,0.05)', border: '1px solid rgba(52,211,153,0.15)' }}>
+            <ShieldCheck className="w-10 h-10 text-[#34D399]" />
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-3">
+            {searchTerm ? 'No results found' : 'All caught up!'}
+          </h3>
+          <p className="text-[#9099A8] max-w-sm font-semibold text-sm">
+            {searchTerm
+              ? `No pending providers match "${searchTerm}". Try a different search.`
+              : 'There are no providers awaiting verification right now. Check back later.'}
+          </p>
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="mt-6 px-5 py-2 rounded-xl transition-all text-sm font-bold"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#9099A8' }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#9099A8'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
+            >
+              Clear Search
+            </button>
+          )}
+        </div>
+
+      ) : (
+        /* Provider List */
+        <div className="space-y-4">
+          <p className="text-xs text-[#9099A8] font-bold uppercase tracking-wider">
+            {filtered.length} provider{filtered.length !== 1 ? 's' : ''} awaiting review (Click to view full application details)
+          </p>
+          <div className="grid grid-cols-1 gap-4">
+            <AnimatePresence mode="popLayout">
+              {filtered.map((provider) => (
+                <ProviderCard
+                  key={provider.id}
+                  provider={provider}
+                  onVerify={handleVerify}
+                  onReject={handleReject}
+                  actionLoading={actionLoading}
+                  onClickDetails={setSelectedProvider}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
+        </div>
+      )}
+
+      {/* Details Modal Overlay */}
+      <AnimatePresence>
+        {selectedProvider && (
+          <DetailsModal
+            provider={selectedProvider}
+            onClose={() => setSelectedProvider(null)}
+            onVerify={handleVerify}
+            onReject={handleReject}
+            actionLoading={actionLoading}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
         )}
       </AnimatePresence>
     </div>
   );
 };
-
-const ShieldCheck = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>
-  </svg>
-);
 
 export default AdminProviders;

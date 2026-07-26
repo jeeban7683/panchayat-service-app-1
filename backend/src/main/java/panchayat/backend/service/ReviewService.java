@@ -22,4 +22,14 @@ public class ReviewService {
     public List<Review> getProviderReviews(Long providerId){
         return repo.findByProviderId(providerId);
     }
+
+    // Get all reviews
+    public List<Review> getAllReviews(){
+        return repo.findAll();
+    }
+
+    // Delete review
+    public void deleteReview(Long id){
+        repo.deleteById(id);
+    }
 }
