@@ -1,6 +1,23 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Client } from '@stomp/stompjs';
 
+const getWsUrl = () => {
+  if (import.meta.env.VITE_WS_URL) return import.meta.env.VITE_WS_URL;
+  const apiUrl = import.meta.env.VITE_API_URL;
+  if (apiUrl) {
+    try {
+      const url = new URL(apiUrl, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+      const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+      return `${protocol}//${url.host}/ws`;
+    } catch {
+      // fallback
+    }
+  }
+  const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const host = typeof window !== 'undefined' ? window.location.host : 'localhost:8080';
+  return `${protocol}//${host}/ws`;
+};
+
 export const useWebSocket = (onMessageReceived) => {
   const clientRef = useRef(null);
   const [connected, setConnected] = useState(false);
@@ -15,8 +32,7 @@ export const useWebSocket = (onMessageReceived) => {
     let isMounted = true;
 
     const client = new Client({
-      // Use native WebSocket — no sockjs-client needed
-      brokerURL: 'ws://localhost:8080/ws',
+      brokerURL: getWsUrl(),
       reconnectDelay: 5000,
       onConnect: () => {
         if (!isMounted) return;

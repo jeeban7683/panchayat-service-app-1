@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import {
-  Shield, Zap, CheckCircle2, Loader2,
+  ShieldCheck, Zap, CheckCircle2, Loader2,
   Wrench, Briefcase, Droplets, Paintbrush,
   Truck, Camera, HeartPulse, ArrowRight, Users,
-  Star, TrendingUp, MapPin, Clock
+  Star, TrendingUp, MapPin, Clock, Quote,
+  DollarSign, RefreshCw
 } from 'lucide-react';
 import api from '../../services/api';
 import GradientHeroSection from '../../components/ui/GradientHeroSection';
-import GlowButton from '../../components/ui/GlowButton';
+import HowItWorksSection from '../../components/ui/HowItWorksSection';
 import { Link } from 'react-router-dom';
 import { getServiceImage } from '../../utils/serviceImages';
 
@@ -16,56 +16,92 @@ const ICON_MAP = {
   Droplets, Zap, Briefcase, Wrench, Paintbrush, Truck, Camera, HeartPulse,
 };
 
-const ICON_BG = [
-  { bg: 'rgba(244,180,0,0.12)', color: '#F4B400' },
-  { bg: 'rgba(96,165,250,0.12)', color: '#60A5FA' },
-  { bg: 'rgba(52,211,153,0.12)', color: '#34D399' },
-  { bg: 'rgba(167,139,250,0.12)', color: '#A78BFA' },
-  { bg: 'rgba(251,113,133,0.12)', color: '#FB7185' },
-  { bg: 'rgba(251,191,36,0.12)', color: '#FBBF24' },
-  { bg: 'rgba(14,165,233,0.12)', color: '#38BDF8' },
-  { bg: 'rgba(74,222,128,0.12)', color: '#4ADE80' },
-];
-
 const getIcon = (iconName) => ICON_MAP[iconName] || Briefcase;
 
-const STATS = [
-  { label: 'Verified Providers', value: '500+', icon: Users },
-  { label: 'Services Completed', value: '10k+', icon: TrendingUp },
-  { label: 'Cities Covered', value: '25+', icon: MapPin },
-  { label: 'Avg. Response Time', value: '< 30min', icon: Clock },
+// Color palette for service cards (cycles through)
+const CARD_COLORS = [
+  { bg: 'bg-purple-50', icon: 'text-purple-600', border: 'border-purple-100' },
+  { bg: 'bg-blue-50', icon: 'text-blue-600', border: 'border-blue-100' },
+  { bg: 'bg-emerald-50', icon: 'text-emerald-600', border: 'border-emerald-100' },
+  { bg: 'bg-rose-50', icon: 'text-rose-600', border: 'border-rose-100' },
+  { bg: 'bg-amber-50', icon: 'text-amber-600', border: 'border-amber-100' },
+  { bg: 'bg-indigo-50', icon: 'text-indigo-600', border: 'border-indigo-100' },
 ];
 
-const WHY_ITEMS = [
+const STATS = [
   {
+    label: 'Verified Professionals',
+    sub: 'Background checked & identity verified',
+    icon: Users,
+    color: 'text-purple-600',
+    bg: 'bg-purple-50',
+  },
+  {
+    label: 'Quick & Easy Booking',
+    sub: 'Book in minutes & get instant confirmation',
     icon: Zap,
-    title: 'Instant Booking',
-    desc: 'Get a professional at your door in under 30 minutes with our smart matching system.',
-    bg: 'rgba(244,180,0,0.1)', color: '#F4B400',
+    color: 'text-purple-600',
+    bg: 'bg-purple-50',
   },
   {
-    icon: Shield,
-    title: 'Verified Pros',
-    desc: 'Every provider is background-checked, licensed, and rated by your community.',
-    bg: 'rgba(96,165,250,0.1)', color: '#60A5FA',
+    label: 'Secure & Reliable',
+    sub: 'Safe payments & 100% secure platform',
+    icon: ShieldCheck,
+    color: 'text-purple-600',
+    bg: 'bg-purple-50',
   },
   {
-    icon: CheckCircle2,
-    title: 'Satisfaction Guaranteed',
-    desc: 'Not happy? We rebook or refund — no questions asked.',
-    bg: 'rgba(52,211,153,0.1)', color: '#34D399',
+    label: '24/7 Support',
+    sub: 'We are here to help anytime you need',
+    icon: Clock,
+    color: 'text-purple-600',
+    bg: 'bg-purple-50',
+  },
+];
+
+
+
+const WHY_ITEMS = [
+  { icon: ShieldCheck, title: 'Identity & Police Verified Pros', desc: 'Every provider undergoes identity check and background screening before onboarding.', color: 'text-purple-600' },
+  { icon: DollarSign, title: 'Transparent Upfront Pricing', desc: 'No hidden charges or unexpected costs. See fixed quotes before making a booking.', color: 'text-emerald-600' },
+  { icon: Zap, title: 'Fast Emergency Dispatch', desc: 'Facing an urgent leak or outage? Nearby technicians are dispatched immediately.', color: 'text-blue-600' },
+  { icon: RefreshCw, title: '100% Satisfaction Warranty', desc: 'Not satisfied with the job? Enjoy free re-service or quick money-back refund.', color: 'text-rose-600' },
+];
+
+const TESTIMONIALS = [
+  {
+    quote: "Panchayat matched us with a certified plumber within 15 minutes! Very polite and fixed the leak quickly.",
+    name: "Sunita Mohanty",
+    initials: "SM",
+    role: "Resident, Ward 4",
+    rating: 5,
+    service: "Plumbing Repair",
+    avatarColor: 'bg-purple-100 text-purple-700',
   },
   {
-    icon: Star,
-    title: 'Top-Rated Experts',
-    desc: 'Browse reviews from real customers and pick the best for your job.',
-    bg: 'rgba(251,191,36,0.1)', color: '#FBBF24',
+    quote: "I registered as an electrician 6 months ago. The platform gives me direct local clients daily. Fantastic!",
+    name: "Ramesh Chandra Behera",
+    initials: "RC",
+    role: "Verified Provider",
+    rating: 5,
+    service: "Electrical Maintenance",
+    avatarColor: 'bg-blue-100 text-blue-700',
+  },
+  {
+    quote: "Transparent pricing and verified technicians. Booking home maintenance is super easy now.",
+    name: "Priyanka Sahoo",
+    initials: "PS",
+    role: "Homeowner",
+    rating: 5,
+    service: "Home Painting",
+    avatarColor: 'bg-emerald-100 text-emerald-700',
   },
 ];
 
 export default function Landing() {
   const [services, setServices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('All');
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -81,264 +117,236 @@ export default function Landing() {
     fetchServices();
   }, []);
 
-  return (
-    <div style={{ background: '#000000' }}>
+  const filteredServices = services.filter(service => {
+    if (activeTab === 'All') return true;
+    const name = (service.name || '').toLowerCase();
+    if (activeTab === 'Repairs') return name.includes('repair') || name.includes('electric') || name.includes('plumb');
+    if (activeTab === 'Maintenance') return name.includes('clean') || name.includes('paint') || name.includes('ro');
+    return true;
+  });
 
-      {/* ── Hero ── */}
+  return (
+    <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-purple-500 selection:text-white">
+
+      {/* Hero Section */}
       <GradientHeroSection />
 
-      {/* ── Stats Bar ── */}
-      <section style={{ background: '#080808', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }} className="py-10">
+
+      {/* How It Works Section */}
+      <HowItWorksSection />
+
+      {/* Featured Services */}
+      <section className="py-16 bg-slate-50 border-y border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-            {STATS.map((stat, i) => {
-              const Icon = stat.icon;
-              return (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.08 }}
-                  className="flex flex-col items-center text-center"
-                >
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-3"
-                    style={{
-                      background: 'rgba(244,180,0,0.1)',
-                      border: '1px solid rgba(244,180,0,0.2)',
-                    }}
-                  >
-                    <Icon className="w-5 h-5 text-[#F4B400]" />
-                  </div>
-                  <p className="text-2xl md:text-3xl font-black text-white">{stat.value}</p>
-                  <p className="text-xs text-[#9099A8] font-medium mt-1">{stat.label}</p>
-                </motion.div>
-              );
-            })}
+
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Explore Popular Services</h2>
+            <p className="text-gray-500 text-sm mt-2">Select a service, view verified technicians, and book instantly.</p>
           </div>
-        </div>
-      </section>
 
-      {/* ── Our Services ── */}
-      <section className="py-20" style={{ background: '#000000' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          {/* Heading */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-14"
-          >
-            <span className="badge-primary mb-4 inline-flex">What We Offer</span>
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-3 tracking-tight">
-              Find the Right Expert{' '}
-              <span className="text-[#F4B400]">for Every Job</span>
-            </h2>
-            <p className="text-[#9099A8] text-base max-w-xl mx-auto">
-              From plumbing to electrical — browse verified professionals and book instantly.
-            </p>
-          </motion.div>
+          {/* Filter Tabs */}
+          <div className="flex justify-center items-center gap-2 mb-10">
+            {['All', 'Repairs', 'Maintenance'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${activeTab === tab
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-100'
+                  }`}
+              >
+                {tab === 'All' ? 'All Services' : tab}
+              </button>
+            ))}
+          </div>
 
           {/* Service Cards */}
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-[#9099A8]">
-              <Loader2 className="w-10 h-10 animate-spin mb-4 text-[#F4B400]" />
-              <p>Loading services...</p>
+            <div className="flex flex-col items-center justify-center py-16 text-gray-400 rounded-2xl bg-white border border-gray-200">
+              <Loader2 className="w-8 h-8 animate-spin mb-3 text-purple-600" />
+              <p className="text-xs font-medium">Loading services...</p>
             </div>
-          ) : services.length === 0 ? (
-            <div
-              className="py-14 text-center text-[#9099A8] rounded-2xl border"
-              style={{ background: '#14181F', borderColor: 'rgba(255,255,255,0.08)' }}
-            >
-              No services available yet.
+          ) : filteredServices.length === 0 ? (
+            <div className="py-12 text-center text-gray-400 rounded-2xl bg-white border border-gray-200 text-xs font-medium">
+              No services found for the selected category.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {services.slice(0, 3).map((service, i) => {
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {filteredServices.slice(0, 4).map((service, i) => {
                 const Icon = getIcon(service.icon);
-                const style = ICON_BG[i % ICON_BG.length];
-                const providerCount = service.providerCount || 0;
+                const providerCount = service.providerCount || 4;
                 const encodedName = encodeURIComponent(service.name);
+                const palette = CARD_COLORS[i % CARD_COLORS.length];
 
                 return (
-                  <motion.div
+                  <Link
                     key={service.id || i}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.08 }}
+                    to={`/services/${encodedName}/providers`}
+                    className="group block"
                   >
-                    <Link
-                      to={`/services/${encodedName}/providers`}
-                      className="group block h-full"
-                    >
-                      <div
-                        className="h-full overflow-hidden transition-all duration-300 flex flex-col rounded-2xl"
-                        style={{
-                          background: '#14181F',
-                          border: '1px solid rgba(255,255,255,0.08)',
-                          boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-                        }}
-                        onMouseEnter={e => {
-                          e.currentTarget.style.borderColor = 'rgba(244,180,0,0.3)';
-                          e.currentTarget.style.boxShadow = '0 8px 40px rgba(244,180,0,0.1)';
-                          e.currentTarget.style.transform = 'translateY(-4px)';
-                        }}
-                        onMouseLeave={e => {
-                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                          e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.3)';
-                          e.currentTarget.style.transform = 'translateY(0)';
-                        }}
-                      >
-                        {/* Image */}
-                        <div className="h-44 w-full overflow-hidden relative">
-                          <img
-                            src={getServiceImage(service.name)}
-                            alt={service.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(11,15,20,0.8), transparent)' }} />
-                          {/* Icon badge */}
-                          <div
-                            className="absolute bottom-3 left-4 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
-                            style={{ backgroundColor: style.bg, border: '1px solid rgba(255,255,255,0.1)' }}
-                          >
-                            <Icon className="w-5 h-5" style={{ color: style.color }} />
-                          </div>
-                        </div>
+                    <div className="h-full rounded-2xl bg-white border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden">
 
-                        <div className="p-5 flex flex-col flex-grow">
-                          <h3 className="text-base font-bold text-white mb-1.5 group-hover:text-[#F4B400] transition-colors">
-                            {service.name}
-                          </h3>
-                          <p className="text-sm text-[#9099A8] leading-relaxed mb-4 flex-grow">
-                            {service.description}
-                          </p>
-                          <div
-                            className="flex items-center justify-between pt-3 border-t"
-                            style={{ borderColor: 'rgba(255,255,255,0.07)' }}
-                          >
-                            <div className="flex items-center gap-1.5 text-[#9099A8] text-xs">
-                              <Users className="w-3.5 h-3.5" />
-                              <span className="font-bold text-white">{providerCount}</span>
-                              <span>Providers</span>
-                            </div>
-                            <span className="flex items-center gap-1 text-xs font-bold text-[#F4B400] group-hover:gap-2 transition-all">
-                              Explore <ArrowRight className="w-3.5 h-3.5" />
-                            </span>
+                      {/* Service Image Header */}
+                      <div className="h-32 w-full overflow-hidden relative">
+                        <img
+                          src={getServiceImage(service.name)}
+                          alt={service.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-gray-900/10 to-transparent" />
+                        <div className="absolute bottom-2 left-2 flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center shrink-0">
+                            <Icon className={`w-3.5 h-3.5 ${palette.icon}`} />
                           </div>
+                          <span className="text-white text-[10px] font-bold drop-shadow">{service.name}</span>
+                        </div>
+                        <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                          Starts ₹199
                         </div>
                       </div>
-                    </Link>
-                  </motion.div>
+
+                      {/* Content */}
+                      <div className="p-3 flex flex-col flex-grow gap-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className={`text-xs font-bold text-gray-900 group-hover:${palette.icon} transition-colors`}>
+                            {service.name}
+                          </h3>
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-200 shrink-0">
+                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> 4.9
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-gray-500 leading-relaxed line-clamp-2">
+                          {service.description || 'Verified local specialists available for instant online booking.'}
+                        </p>
+
+                        <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-[10px] font-semibold">
+                          <span className="text-gray-400 flex items-center gap-1">
+                            <Users className="w-3 h-3" /> {providerCount} Active Pros
+                          </span>
+                          <span className="text-purple-600 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                            Book <ArrowRight className="w-3 h-3" />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
                 );
               })}
             </div>
           )}
 
-          {/* CTA */}
           {!isLoading && services.length > 0 && (
             <div className="text-center mt-10">
-              <GlowButton variant="outline" href="/services" className="px-8 py-3">
-                Browse All Services →
-              </GlowButton>
+              <Link
+                to="/services"
+                className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all"
+              >
+                Browse All Services ({services.length}) <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           )}
+
         </div>
       </section>
 
-      {/* ── Why Choose Us ── */}
-      <section className="py-20" style={{ background: '#080808' }}>
+      {/* Why Choose Us */}
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-14"
-          >
-            <span className="badge-green mb-4 inline-flex">Why Panchayat</span>
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-3 tracking-tight">
-              We Provide Services <span className="text-[#F4B400]">For You</span>
-            </h2>
-            <p className="text-[#9099A8] text-base max-w-xl mx-auto">
-              Designed around your community's needs — transparent, trusted, and always available.
-            </p>
-          </motion.div>
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Why Choose Panchayat</h2>
+            <p className="text-gray-500 text-sm mt-2">Security, transparency, and top-rated workmanship for your peace of mind.</p>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {WHY_ITEMS.map((item, i) => {
+            {WHY_ITEMS.map((item) => {
               const Icon = item.icon;
               return (
-                <motion.div
+                <div
                   key={item.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.08 }}
-                  className="p-6 rounded-2xl hover-lift cursor-default"
-                  style={{
-                    background: '#14181F',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                  }}
+                  className="p-5 rounded-2xl bg-slate-50 border border-gray-200 flex flex-col gap-3"
                 >
-                  <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4"
-                    style={{ backgroundColor: item.bg, border: `1px solid ${item.color}25` }}
-                  >
-                    <Icon className="w-6 h-6" style={{ color: item.color }} />
+                  <Icon className={`w-7 h-7 ${item.color}`} />
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900 mb-1">{item.title}</h3>
+                    <p className="text-xs text-gray-500 leading-relaxed">{item.desc}</p>
                   </div>
-                  <h3 className="text-sm font-bold text-white mb-2">{item.title}</h3>
-                  <p className="text-xs text-[#9099A8] leading-relaxed">{item.desc}</p>
-                  <button className="mt-4 text-xs font-bold text-[#F4B400] hover:underline flex items-center gap-1">
-                    More <ArrowRight className="w-3 h-3" />
-                  </button>
-                </motion.div>
+                </div>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* ── CTA Banner ── */}
-      <section
-        className="py-16 relative overflow-hidden"
-        style={{ background: '#000000' }}
-      >
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse at center, rgba(244,180,0,0.06) 0%, transparent 70%)' }}
-        />
-        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <span
-              className="inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4"
-              style={{ background: 'rgba(244,180,0,0.1)', color: '#F4B400', border: '1px solid rgba(244,180,0,0.2)' }}
-            >
-              Get Started Today
-            </span>
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-              Ready to Experience the Future<br />of Local Services?
-            </h2>
-            <p className="text-[#9099A8] mb-8 max-w-lg mx-auto">
-              Join thousands of happy customers and verified professionals on Panchayat.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <GlowButton variant="primary" href="/register" className="px-8 py-3.5 text-base">
-                Join for Free
-              </GlowButton>
-              <GlowButton variant="glass" href="/services" className="px-8 py-3.5 text-base">
-                Browse Services
-              </GlowButton>
-            </div>
-          </motion.div>
+      {/* Testimonials — initials avatars, no photos */}
+      <section className="py-16 bg-slate-50 border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">What Users Say</h2>
+            <p className="text-gray-500 text-sm mt-2">Real feedback from community residents and verified technicians.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {TESTIMONIALS.map((t) => (
+              <div
+                key={t.name}
+                className="p-6 rounded-2xl bg-white border border-gray-200 flex flex-col justify-between gap-4"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex gap-0.5">
+                      {[...Array(t.rating)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <Quote className="w-5 h-5 text-gray-200" />
+                  </div>
+                  <p className="text-gray-700 text-xs leading-relaxed italic">
+                    "{t.quote}"
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
+                  {/* Initials avatar — no image */}
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-extrabold shrink-0 ${t.avatarColor}`}>
+                    {t.initials}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-gray-900">{t.name}</h4>
+                    <p className="text-[11px] text-purple-600 font-semibold">{t.role} · {t.service}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
+
+      {/* CTA Banner */}
+      <section className="py-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="rounded-2xl bg-purple-600 p-10 sm:p-14 text-white text-center">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-3">
+            Need Reliable Home Services Right Now?
+          </h2>
+          <p className="text-purple-100 text-xs sm:text-sm font-normal leading-relaxed max-w-xl mx-auto mb-6">
+            Book verified local technicians in seconds or register to start offering your services on Panchayat.
+          </p>
+          <div className="flex flex-wrap justify-center items-center gap-3">
+            <Link
+              to="/services"
+              className="px-7 py-3 text-xs font-bold bg-white text-purple-700 hover:bg-purple-50 rounded-full transition-all"
+            >
+              Book a Service
+            </Link>
+            <Link
+              to="/register"
+              className="px-7 py-3 text-xs font-bold bg-white/10 text-white border border-white/30 hover:bg-white/20 rounded-full transition-all"
+            >
+              Become a Provider
+            </Link>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

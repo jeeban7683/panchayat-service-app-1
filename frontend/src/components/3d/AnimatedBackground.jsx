@@ -2,7 +2,10 @@ import { motion } from "framer-motion";
 
 export default function AnimatedBackground() {
   return (
-    <div className="fixed inset-0 z-0 overflow-hidden bg-slate-900 pointer-events-none">
+    <div
+      aria-hidden="true"
+      className="fixed inset-0 z-0 overflow-hidden bg-main-bg pointer-events-none"
+    >
 
       
       {/* Animated Gradient Orbs */}
@@ -31,7 +34,7 @@ export default function AnimatedBackground() {
           repeat: Infinity,
           ease: "linear",
         }}
-        className="absolute top-[20%] right-[10%] w-[40vw] h-[40vw] rounded-full bg-accent-purple/10 blur-[120px]"
+        className="absolute top-[20%] right-[10%] w-[40vw] h-[40vw] rounded-full bg-lavender-500/10 blur-[120px]"
       />
 
       <motion.div
@@ -44,10 +47,10 @@ export default function AnimatedBackground() {
           repeat: Infinity,
           ease: "linear",
         }}
-        className="absolute bottom-[-10%] left-[20%] w-[60vw] h-[60vw] rounded-full bg-primary-700/10 blur-[150px]"
+        className="absolute bottom-[-10%] left-[20%] w-[60vw] h-[60vw] rounded-full bg-lavender-700/10 blur-[150px]"
       />
       
-      <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-[50px]"></div>
+      <div className="absolute inset-0 bg-main-bg/55 backdrop-blur-[50px]"></div>
     </div>
   );
 }

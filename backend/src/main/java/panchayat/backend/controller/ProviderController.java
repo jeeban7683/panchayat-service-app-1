@@ -15,7 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/providers")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "${app.frontend.url}")
 public class ProviderController {
 
     @Autowired
@@ -74,16 +74,6 @@ public class ProviderController {
         return providerRepository.findByIsVerified(false);
     }
 
-    // PROVIDER PROFILE
-
-    // @GetMapping("/profile/{userId}")
-    // public ResponseEntity<ProviderProfileDTO> getProfile(
-    // @PathVariable Long userId) {
-    //
-    // return ResponseEntity.ok(
-    // service.getProfile(userId)
-    // );
-    // }
 
     @PutMapping("/profile/{providerId}")
     public ResponseEntity<ProviderProfileDTO> updateProfile(
@@ -93,22 +83,7 @@ public class ProviderController {
         return ResponseEntity.ok(
                 service.updateProfile(providerId, dto));
     }
-    // PROFILE IMAGE
 
-    // Old path kept for backwards compatibility
-    @PostMapping("/upload-photo/{providerId}")
-    public ResponseEntity<Map<String, String>> uploadPhoto(
-            @PathVariable Long providerId,
-            @RequestParam("file") MultipartFile file) {
-
-        String imagePath = service.uploadProfilePhoto(providerId, file);
-
-        return ResponseEntity.ok(
-                Map.of(
-                        "message", "Photo uploaded successfully",
-                        "profileImage", imagePath,
-                        "imageUrl", imagePath));
-    }
 
     // New path: POST /api/providers/{providerId}/upload-photo
     @PostMapping("/{providerId}/upload-photo")
@@ -116,7 +91,7 @@ public class ProviderController {
             @PathVariable Long providerId,
             @RequestParam("file") MultipartFile file) {
 
-        String imagePath = service.uploadProfilePhoto(providerId, file);
+        String imagePath = service.uploadPhoto(providerId, file);
 
         return ResponseEntity.ok(
                 Map.of(

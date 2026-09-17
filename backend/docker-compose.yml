@@ -1,0 +1,66 @@
+services:
+
+  mysql:
+    image: mysql:8.4
+
+    container_name: panchayat-mysql
+
+    restart: always
+
+    environment:
+      MYSQL_DATABASE: panchayat_mysql
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uroot",
+          "-p${MYSQL_ROOT_PASSWORD}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+
+  backend:
+
+    build: .
+
+    container_name: panchayat-backend
+
+    restart: always
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    env_file:
+      - .env
+
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/panchayat_mysql?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USERNAME: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+    ports:
+      - "8080:8080"
+
+    volumes:
+      - ./uploads:/app/uploads
+
+
+volumes:
+
+  mysql-data:

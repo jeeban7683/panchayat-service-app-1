@@ -28,8 +28,8 @@ const BookingDetails = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-[400px] flex flex-col items-center justify-center text-[#9099A8]">
-        <Loader2 className="w-10 h-10 animate-spin mb-4 text-[#F4B400]" />
+      <div className="min-h-[400px] flex flex-col items-center justify-center text-gray-500">
+        <Loader2 className="w-10 h-10 animate-spin mb-4 text-[#8B5CF6]" />
         <p className="text-sm font-medium">Loading booking details...</p>
       </div>
     );
@@ -39,10 +39,10 @@ const BookingDetails = () => {
     return (
       <div
         className="text-center py-20 rounded-2xl max-w-md mx-auto"
-        style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+        style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}
       >
-        <h3 className="text-xl font-bold text-white mb-2">Booking not found</h3>
-        <p className="text-[#9099A8] mb-6 text-sm">We couldn't find the booking you're looking for.</p>
+        <h3 className="text-xl font-bold text-gray-900 mb-2">Booking not found</h3>
+        <p className="text-gray-500 mb-6 text-sm">We couldn't find the booking you're looking for.</p>
         <GlowButton variant="primary" onClick={() => navigate('/user/bookings')}>Back to Bookings</GlowButton>
       </div>
     );
@@ -59,19 +59,19 @@ const BookingDetails = () => {
       <div className="flex items-center gap-4 mb-8">
         <button 
           onClick={() => navigate(-1)} 
-          className="p-2 transition-all rounded-xl text-[#9099A8] hover:text-white"
-          style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+          className="p-2 transition-all rounded-xl text-gray-500 hover:text-white"
+          style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-black text-white flex items-center gap-3 tracking-tight">
+          <h1 className="text-2xl font-black text-gray-900 flex items-center gap-3 tracking-tight">
             Booking #{id}
-            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#F4B400]/10 text-[#FBBF24] border border-[#F4B400]/25">
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/25">
               {bookingData.status}
             </span>
           </h1>
-          <p className="text-[#9099A8] text-xs font-semibold uppercase tracking-wider mt-0.5">{serviceName}</p>
+          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mt-0.5">{serviceName}</p>
         </div>
       </div>
 
@@ -79,27 +79,27 @@ const BookingDetails = () => {
         
         {/* Main Details (Left Col) */}
         <div className="md:col-span-2 space-y-6">
-          <Card className="p-6 md:p-8" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <h3 className="text-lg font-bold text-white mb-5 border-b pb-3" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <Card className="p-6 md:p-8" style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}>
+            <h3 className="text-lg font-bold text-gray-900 mb-5 border-b pb-3" style={{ borderColor: 'rgba(139,92,246,0.08)' }}>
               Service Details
             </h3>
             
             <div className="grid sm:grid-cols-2 gap-6">
               <div>
-                <p className="text-xs font-semibold text-[#9099A8] uppercase tracking-wider mb-1 flex items-center gap-1.5"><Calendar className="w-4 h-4 text-[#F4B400]"/> Date</p>
-                <p className="font-bold text-[#C9CED6] text-sm">{bookingData.date || 'Not specified'}</p>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Calendar className="w-4 h-4 text-[#8B5CF6]"/> Date</p>
+                <p className="font-bold text-gray-600 text-sm">{bookingData.date || 'Not specified'}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold text-[#9099A8] uppercase tracking-wider mb-1 flex items-center gap-1.5"><Clock className="w-4 h-4 text-[#F4B400]"/> Time</p>
-                <p className="font-bold text-[#C9CED6] text-sm">{bookingData.time || 'Not specified'}</p>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Clock className="w-4 h-4 text-[#8B5CF6]"/> Time</p>
+                <p className="font-bold text-gray-600 text-sm">{bookingData.time || 'Not specified'}</p>
               </div>
               <div className="sm:col-span-2">
-                <p className="text-xs font-semibold text-[#9099A8] uppercase tracking-wider mb-1 flex items-center gap-1.5"><MapPin className="w-4 h-4 text-[#F4B400]"/> Location</p>
-                <p className="font-bold text-[#C9CED6] text-sm">{bookingData.address || 'Address not provided'}</p>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1.5"><MapPin className="w-4 h-4 text-[#8B5CF6]"/> Location</p>
+                <p className="font-bold text-gray-600 text-sm">{bookingData.address || 'Address not provided'}</p>
               </div>
               <div className="sm:col-span-2">
-                <p className="text-xs font-semibold text-[#9099A8] uppercase tracking-wider mb-1 flex items-center gap-1.5"><FileText className="w-4 h-4 text-[#F4B400]"/> Requirements</p>
-                <div className="p-4 rounded-xl text-[#C9CED6] text-sm leading-relaxed italic" style={{ background: '#1A1F28', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1.5"><FileText className="w-4 h-4 text-[#8B5CF6]"/> Requirements</p>
+                <div className="p-4 rounded-xl text-gray-600 text-sm leading-relaxed italic" style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}>
                   "{bookingData.requirements || 'No special requirements mentioned.'}"
                 </div>
               </div>
@@ -107,45 +107,97 @@ const BookingDetails = () => {
           </Card>
 
           {/* Timeline Section */}
-          <Card className="p-6 md:p-8" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <h3 className="text-lg font-bold text-white mb-6 border-b pb-3" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <Card className="p-6 md:p-8" style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}>
+            <h3 className="text-lg font-bold text-gray-900 mb-6 border-b pb-3" style={{ borderColor: 'rgba(139,92,246,0.08)' }}>
               Booking Timeline
             </h3>
-            <div className="relative border-l ml-3 space-y-6" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-              <div className="relative pl-6">
-                <div className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full border-2 bg-[#F4B400]" style={{ borderColor: '#14181F' }} />
-                <h4 className="font-bold text-white text-sm">Booking Placed</h4>
-                <p className="text-xs text-[#9099A8] mt-0.5">Wait for provider confirmation</p>
-              </div>
-              {bookingData.status !== 'PENDING' && bookingData.status !== 'REJECTED' && (
-                <div className="relative pl-6">
-                  <div className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full border-2 bg-[#F4B400]" style={{ borderColor: '#14181F' }} />
-                  <h4 className="font-bold text-white text-sm">Provider Confirmed</h4>
-                  <p className="text-xs text-[#9099A8] mt-0.5">Service has been accepted</p>
+            {(() => {
+              const statusOrder = ['PENDING', 'ACCEPTED', 'IN_PROGRESS', 'COMPLETED'];
+              const currentStatusIndex = statusOrder.indexOf(bookingData.status);
+              const steps = [
+                { status: 'PENDING', title: 'Booking Placed', desc: 'Wait for provider confirmation' },
+                { status: 'ACCEPTED', title: 'Provider Confirmed', desc: 'Service request accepted' },
+                { status: 'IN_PROGRESS', title: 'In Progress', desc: 'Service currently underway' },
+                { status: 'COMPLETED', title: 'Service Completed', desc: 'Job finished successfully' }
+              ];
+
+              return (
+                <div className="relative pl-1">
+                  {steps.map((step, index) => {
+                    const isReached = currentStatusIndex !== -1 && index <= currentStatusIndex;
+                    const isCurrent = currentStatusIndex !== -1 && index === currentStatusIndex;
+                    const isCompleted = currentStatusIndex !== -1 && index < currentStatusIndex;
+                    const isLineGreen = currentStatusIndex !== -1 && index < currentStatusIndex;
+                    const isLast = index === steps.length - 1;
+
+                    return (
+                      <div key={step.status} className="relative flex items-start pb-6 last:pb-0 group">
+                        {!isLast && (
+                          <div
+                            className={`absolute left-5 top-10 bottom-0 w-1 transition-all duration-500 rounded-full ${
+                              isLineGreen
+                                ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]'
+                                : 'bg-purple-100'
+                            }`}
+                          />
+                        )}
+                        <div
+                          className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 shrink-0 ${
+                            isReached
+                              ? isCurrent
+                                ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-200 scale-105 ring-4 ring-emerald-100'
+                                : 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
+                              : 'bg-purple-50/50 border-purple-100 text-gray-400'
+                          }`}
+                        >
+                          {isReached ? (
+                            <CheckCircle className="w-5 h-5 text-white stroke-[2.5]" />
+                          ) : (
+                            <Clock className="w-4 h-4 text-purple-300" />
+                          )}
+                        </div>
+                        <div className="ml-4 pt-1 flex-1">
+                          <div className="flex justify-between items-center">
+                            <h4 className={`text-sm font-black transition-colors ${
+                              isReached ? 'text-gray-900' : 'text-gray-400'
+                            }`}>
+                              {step.title}
+                            </h4>
+                            {isCurrent && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 animate-pulse">
+                                Active
+                              </span>
+                            )}
+                          </div>
+                          <p className={`text-xs mt-0.5 font-bold transition-colors ${
+                            isReached ? 'text-emerald-600' : 'text-gray-400'
+                          }`}>
+                            {isCompleted ? 'Completed' : isCurrent ? 'Active' : 'Pending'}
+                          </p>
+                          <p className="text-[11px] text-gray-400 font-medium mt-0.5">
+                            {step.desc}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
-              {bookingData.status === 'COMPLETED' && (
-                <div className="relative pl-6">
-                  <div className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full border-2 bg-[#34D399]" style={{ borderColor: '#14181F' }} />
-                  <h4 className="font-bold text-white text-sm">Service Completed</h4>
-                  <p className="text-xs text-[#9099A8] mt-0.5">Job successfully finished</p>
-                </div>
-              )}
-            </div>
+              );
+            })()}
           </Card>
         </div>
 
         {/* Sidebar Info (Right Col) */}
         <div className="space-y-6">
-          <Card className="p-6" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <h3 className="text-xs font-bold text-[#9099A8] mb-4 tracking-widest uppercase border-b pb-2" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>Provider</h3>
+          <Card className="p-6" style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}>
+            <h3 className="text-xs font-bold text-gray-500 mb-4 tracking-widest uppercase border-b pb-2" style={{ borderColor: 'rgba(139,92,246,0.08)' }}>Provider</h3>
             <div className="flex items-center gap-4 mb-5">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-black" style={{ background: '#F4B400', color: '#000' }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-black" style={{ background: '#8B5CF6', color: '#000' }}>
                 {providerName.charAt(0)}
               </div>
               <div>
-                <p className="font-bold text-white text-sm">{providerName}</p>
-                <Link to={`/providers/${bookingData.provider?.id}`} className="text-xs text-[#F4B400] font-bold hover:underline">View Profile</Link>
+                <p className="font-bold text-gray-900 text-sm">{providerName}</p>
+                <Link to={`/providers/${bookingData.provider?.id}`} className="text-xs text-[#8B5CF6] font-bold hover:underline">View Profile</Link>
               </div>
             </div>
             <div className="space-y-3">
@@ -153,25 +205,25 @@ const BookingDetails = () => {
             </div>
           </Card>
 
-          <Card className="p-6" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <h3 className="text-xs font-bold text-[#9099A8] mb-4 tracking-widest uppercase border-b pb-2" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>Payment Summary</h3>
+          <Card className="p-6" style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}>
+            <h3 className="text-xs font-bold text-gray-500 mb-4 tracking-widest uppercase border-b pb-2" style={{ borderColor: 'rgba(139,92,246,0.08)' }}>Payment Summary</h3>
             <div className="space-y-3 text-xs">
-              <div className="flex justify-between text-[#9099A8] font-semibold">
+              <div className="flex justify-between text-gray-500 font-semibold">
                 <span>Service Charge</span>
-                <span className="flex items-center gap-0.5 text-white font-bold"><IndianRupee className="w-3 h-3" /> {price}</span>
+                <span className="flex items-center gap-0.5 text-gray-900 font-bold"><IndianRupee className="w-3 h-3" /> {price}</span>
               </div>
-              <div className="flex justify-between text-[#9099A8] font-semibold">
+              <div className="flex justify-between text-gray-500 font-semibold">
                 <span>Platform Fees</span>
-                <span className="flex items-center gap-0.5 text-white font-bold"><IndianRupee className="w-3 h-3" /> 20</span>
+                <span className="flex items-center gap-0.5 text-gray-900 font-bold"><IndianRupee className="w-3 h-3" /> 20</span>
               </div>
-              <div className="border-t pt-3 flex justify-between font-bold text-white text-sm" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+              <div className="border-t pt-3 flex justify-between font-bold text-gray-900 text-sm" style={{ borderColor: 'rgba(139,92,246,0.08)' }}>
                 <span>Estimated Total</span>
-                <span className="flex items-center gap-0.5 text-[#F4B400] font-black text-lg"><IndianRupee className="w-3.5 h-3.5" /> {price + 20}</span>
+                <span className="flex items-center gap-0.5 text-[#8B5CF6] font-black text-lg"><IndianRupee className="w-3.5 h-3.5" /> {price + 20}</span>
               </div>
             </div>
             
             <div className="mt-5 p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <p className="text-[9px] text-[#9099A8] uppercase tracking-wider text-center font-bold">
+              <p className="text-[9px] text-gray-500 uppercase tracking-wider text-center font-bold">
                 Payment after service completion
               </p>
             </div>

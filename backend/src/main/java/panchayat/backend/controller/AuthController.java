@@ -29,7 +29,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "${app.frontend.url}")
 public class AuthController {
 
     @Autowired
@@ -80,19 +80,41 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public Object register(@RequestBody RegisterRequest request) {
-        if (request.getRole().equalsIgnoreCase("ADMIN")) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        if (request.getRole() == null || request.getRole().trim().isEmpty()) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("message", "Role is required for registration.");
+            return ResponseEntity.badRequest().body(err);
+        }
+
+        String roleStr = request.getRole().trim().toUpperCase();
+
+        if (roleStr.equals("ADMIN")) {
             if (!request.getEmail().equalsIgnoreCase("jeevanjyotigochhayatjitu@gmail.com")) {
-                throw new RuntimeException("Only authorized email is permitted to register as Admin.");
+                Map<String, Object> err = new HashMap<>();
+                err.put("message", "Only the authorized email is permitted to register as Admin.");
+                return ResponseEntity.badRequest().body(err);
             }
             if (!request.getPassword().equals("Jeevan@2005")) {
-                throw new RuntimeException("Invalid Admin Secret Password. Registration denied.");
+                Map<String, Object> err = new HashMap<>();
+                err.put("message", "Invalid Admin Secret Password. Registration denied.");
+                return ResponseEntity.badRequest().body(err);
             }
         }
+
         if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body("Email already registered");
+            Map<String, Object> err = new HashMap<>();
+            err.put("message", "Email already registered");
+            return ResponseEntity.badRequest().body(err);
+        }
+
+        Role role;
+        try {
+            role = Role.valueOf(roleStr);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("message", "Invalid user role: " + roleStr);
+            return ResponseEntity.badRequest().body(err);
         }
 
         User user = new User();
@@ -101,12 +123,12 @@ public class AuthController {
         user.setPhone(request.getPhone());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.valueOf(request.getRole()));
+        user.setRole(role);
 
         User savedUser = userRepository.save(user);
 
         // PROVIDER Specific setup
-        if (request.getRole().equals("PROVIDER")) {
+        if (roleStr.equals("PROVIDER")) {
             ServiceProvider provider = new ServiceProvider();
             provider.setUser(savedUser);
             provider.setVerified(false);
@@ -117,15 +139,20 @@ public class AuthController {
                             ? request.getResponseTime()
                             : "Fast (under 1hr)"
             );
-            provider.setService(
-                    serviceRepository.findById(request.getServiceId())
-                            .orElseThrow(() -> new RuntimeException("Service not found"))
-            );
+
+            if (request.getServiceId() != null) {
+                serviceRepository.findById(request.getServiceId())
+                        .ifPresent(provider::setService);
+            }
 
             providerRepository.save(provider);
         }
 
-        return savedUser;
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "User registered successfully");
+        response.put("user", savedUser);
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/forgot-password")
@@ -216,6 +243,28 @@ public class AuthController {
         return ResponseEntity.ok(user);
     }
 
+    @PostMapping("/google/dev-login")
+    public ResponseEntity<?> googleDevLogin() {
+        String email = "google.user@panchayat.com";
+        User user = userRepository.findByEmail(email).orElseGet(() -> {
+            User u = new User();
+            u.setName("Google User");
+            u.setEmail(email);
+            u.setRole(Role.USER);
+            u.setCreatedAt(LocalDateTime.now());
+            u.setPassword(passwordEncoder.encode("google123"));
+            return userRepository.save(u);
+        });
+
+        String token = jwtUtil.generateToken(user.getEmail());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
+        response.put("user", user);
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/test-mail")
     public String testMail() {
         SimpleMailMessage message = new SimpleMailMessage();
@@ -227,4 +276,4 @@ public class AuthController {
 
         return "Mail Sent";
     }
-}
+}

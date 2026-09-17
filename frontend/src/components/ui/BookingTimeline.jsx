@@ -14,14 +14,15 @@ export default function BookingTimeline({ currentStep = 2, steps = [], className
   const timelineSteps = steps.length ? steps : defaultSteps;
 
   return (
-    <div className={cn("glass-panel p-6 rounded-2xl", className)}>
-      <h3 className="text-xl font-semibold text-white mb-8">Booking Progress</h3>
+    <div className={cn("p-6 rounded-2xl bg-white border border-purple-100 shadow-sm", className)}>
+      <h3 className="text-xl font-bold text-gray-900 mb-8">Booking Progress</h3>
       <div className="relative">
-        <div className="absolute left-6 top-4 bottom-4 w-px bg-dark-700" />
+        <div className="absolute left-6 top-4 bottom-4 w-1 bg-purple-100 rounded-full" />
         
         {timelineSteps.map((step, index) => {
-          const isCompleted = index < currentStep;
+          const isCompleted = index <= currentStep;
           const isCurrent = index === currentStep;
+          const isLineGreen = index < currentStep;
           const Icon = step.icon;
 
           return (
@@ -31,10 +32,10 @@ export default function BookingTimeline({ currentStep = 2, steps = [], className
                 animate={{ scale: 1 }}
                 transition={{ delay: index * 0.1, type: "spring" }}
                 className={cn(
-                  "relative z-10 w-12 h-12 rounded-full flex items-center justify-center border-2 transition-colors duration-500",
-                  isCompleted ? "bg-accent-blue/20 border-accent-blue text-accent-blue neon-glow" :
-                  isCurrent ? "bg-dark-800 border-white text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" :
-                  "bg-dark-900 border-dark-600 text-dark-500"
+                  "relative z-10 w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-500",
+                  isCompleted ? "bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-200" :
+                  isCurrent ? "bg-emerald-500 border-emerald-500 text-white ring-4 ring-emerald-100" :
+                  "bg-purple-50 border-purple-100 text-gray-400"
                 )}
               >
                 <Icon className={cn("w-5 h-5", isCurrent && "animate-pulse")} />
@@ -46,8 +47,8 @@ export default function BookingTimeline({ currentStep = 2, steps = [], className
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: (index * 0.1) + 0.1 }}
                   className={cn(
-                    "text-lg font-medium transition-colors",
-                    isCompleted || isCurrent ? "text-white neon-text-glow" : "text-dark-400"
+                    "text-lg font-bold transition-colors",
+                    isCompleted || isCurrent ? "text-gray-900" : "text-gray-400"
                   )}
                 >
                   {step.title}
@@ -56,18 +57,18 @@ export default function BookingTimeline({ currentStep = 2, steps = [], className
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: (index * 0.1) + 0.2 }}
-                  className="text-sm text-dark-300 mt-1"
+                  className="text-sm text-gray-500 mt-1 font-medium"
                 >
                   {step.description}
                 </motion.p>
               </div>
 
-              {isCompleted && index < timelineSteps.length - 1 && (
+              {isLineGreen && index < timelineSteps.length - 1 && (
                 <motion.div
                   initial={{ height: 0 }}
                   animate={{ height: "100%" }}
                   transition={{ duration: 0.5, delay: index * 0.2 }}
-                  className="absolute left-6 top-12 w-px bg-accent-blue shadow-[0_0_10px_rgba(6,182,212,0.8)]"
+                  className="absolute left-[23px] top-12 w-1 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] rounded-full"
                   style={{ height: 'calc(100% + 2rem)' }}
                 />
               )}

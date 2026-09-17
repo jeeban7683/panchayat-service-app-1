@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Star, Trash2, Loader2, AlertTriangle,
-  RefreshCw, MessageSquare, StarOff, CheckCircle
+  RefreshCw, MessageSquare, StarOff, CheckCircle2,
+  User, Shield, Sparkles
 } from 'lucide-react';
 import api from '../../services/api';
 import Card from '../../components/ui/Card';
@@ -14,18 +15,15 @@ const Toast = ({ message, type, onClose }) => (
     initial={{ opacity: 0, y: 60, scale: 0.9 }}
     animate={{ opacity: 1, y: 0, scale: 1 }}
     exit={{ opacity: 0, y: 60, scale: 0.9 }}
-    className="fixed bottom-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-bold"
-    style={{
-      background: type === 'success' ? 'rgba(52,211,153,0.1)' : 'rgba(239,68,68,0.1)',
-      borderColor: type === 'success' ? 'rgba(52,211,153,0.25)' : 'rgba(239,68,68,0.25)',
-      color: type === 'success' ? '#34D399' : '#F87171'
-    }}
+    className={`fixed bottom-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-xl border text-xs font-bold ${
+      type === 'success' ? 'bg-emerald-600 text-white shadow-emerald-200' : 'bg-red-600 text-white shadow-red-200'
+    }`}
   >
     {type === 'success'
-      ? <CheckCircle className="w-5 h-5 text-[#34D399] shrink-0" />
-      : <AlertTriangle className="w-5 h-5 text-[#F87171] shrink-0" />}
+      ? <CheckCircle2 className="w-4.5 h-4.5 text-emerald-200 shrink-0" />
+      : <AlertTriangle className="w-4.5 h-4.5 text-red-200 shrink-0" />}
     {message}
-    <button onClick={onClose} className="ml-2 opacity-60 hover:opacity-100 transition-opacity text-lg leading-none">×</button>
+    <button onClick={onClose} className="ml-2 opacity-70 hover:opacity-100 text-base leading-none">×</button>
   </motion.div>
 );
 
@@ -35,6 +33,7 @@ const AdminReviews = () => {
   const [error,        setError]        = useState(null);
   const [searchTerm,   setSearchTerm]   = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated,  setLastUpdated]  = useState(new Date());
   const [toast,        setToast]        = useState(null);
   const [deleting,     setDeleting]     = useState(null);
 
@@ -62,8 +61,15 @@ const AdminReviews = () => {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await fetchReviews(true);
-    setIsRefreshing(false);
+    try {
+      await fetchReviews(true);
+      setLastUpdated(new Date());
+      showToast('Reviews refreshed successfully!', 'success');
+    } catch (err) {
+      console.error('Refresh error:', err);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   // ── Delete review ─────────────────────────────────────────────────────────────
@@ -99,12 +105,12 @@ const AdminReviews = () => {
   // ── Loading ───────────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-[#9099A8] font-medium">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-gray-500 font-medium bg-[#F5F3FF]">
         <div className="relative">
-          <div className="w-20 h-20 border-2 border-[#F4B400]/20 border-t-[#F4B400] rounded-full animate-spin" />
-          <Loader2 className="w-8 h-8 text-[#F4B400] animate-pulse absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+          <div className="w-20 h-20 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(139,92,246,0.2)', borderTopColor: '#8B5CF6' }} />
+          <Loader2 className="w-8 h-8 text-[#8B5CF6] animate-pulse absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
         </div>
-        <p className="text-sm font-semibold">Loading reviews...</p>
+        <p className="text-sm font-medium">Loading review moderation data...</p>
       </div>
     );
   }
@@ -112,13 +118,13 @@ const AdminReviews = () => {
   // ── Error ─────────────────────────────────────────────────────────────────────
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center px-6 text-white">
-        <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center">
-          <AlertTriangle className="w-8 h-8 text-red-400" />
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center px-6 bg-[#F5F3FF]">
+        <div className="w-16 h-16 bg-red-50 border border-red-200 rounded-full flex items-center justify-center">
+          <AlertTriangle className="w-8 h-8 text-red-500" />
         </div>
-        <h3 className="text-xl font-bold text-white">Failed to load reviews</h3>
-        <p className="text-[#9099A8] text-sm max-w-sm font-semibold">{error}</p>
-        <GlowButton onClick={() => fetchReviews()} variant="primary" className="px-6 py-2.5 text-sm font-bold">
+        <h3 className="text-xl font-semibold text-gray-900">Failed to load reviews</h3>
+        <p className="text-gray-500 text-sm max-w-sm font-normal">{error}</p>
+        <GlowButton onClick={() => fetchReviews()} variant="primary" className="px-6 py-2.5 text-sm font-semibold">
           Try Again
         </GlowButton>
       </div>
@@ -126,156 +132,189 @@ const AdminReviews = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-12 py-8 px-4 sm:px-6 lg:px-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="max-w-6xl mx-auto space-y-6 pb-12 py-8 px-4 sm:px-6 lg:px-8 bg-[#F5F3FF] min-h-screen">
+      {/* Executive Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl border border-purple-50 shadow-[0_8px_30px_rgba(99,102,241,0.06)]">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.2)' }}>
-              <MessageSquare className="w-5 h-5 text-[#F4B400]" />
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-purple-100 text-[#8B5CF6]">
+              <MessageSquare className="w-5 h-5" />
             </div>
-            <h1 className="text-3xl font-black text-white tracking-tight">Review Moderation</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Review Moderation</h1>
           </div>
-          <p className="text-[#9099A8] text-sm font-semibold ml-13">Monitor and moderate customer reviews across the platform.</p>
+          <p className="text-gray-500 text-xs sm:text-sm font-normal ml-[52px]">Monitor and moderate customer reviews across the platform.</p>
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+
+        <div className="flex items-center gap-3 w-full sm:w-auto self-end sm:self-auto">
+          <div className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold shrink-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+          </div>
+
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9099A8] w-4 h-4" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
               placeholder="Search reviews..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl text-white placeholder-[#4B5563] outline-none transition-all text-sm font-medium"
-              style={{ background: '#1A1F28', border: '1px solid rgba(255,255,255,0.08)' }}
-              onFocus={e => { e.target.style.borderColor = '#F4B400'; e.target.style.boxShadow = '0 0 0 3px rgba(244,180,0,0.12)'; }}
-              onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }}
+              className="w-full pl-9 pr-4 py-2.5 rounded-2xl text-gray-900 placeholder-gray-400 outline-none transition-all text-xs font-semibold bg-white border border-purple-100 shadow-xs"
+              onFocus={e => { e.target.style.borderColor = '#8B5CF6'; e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.12)'; }}
+              onBlur={e => { e.target.style.borderColor = 'rgba(139,92,246,0.12)'; e.target.style.boxShadow = 'none'; }}
             />
           </div>
+
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm font-bold shrink-0 disabled:opacity-50"
-            style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)', color: '#9099A8' }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#9099A8'; e.currentTarget.style.background = '#14181F'; }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs transition-all bg-[#8B5CF6] text-white hover:bg-[#7C3AED] active:scale-95 shadow-md shadow-purple-200 disabled:opacity-50 cursor-pointer shrink-0"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
           </button>
         </div>
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-2xl p-5 flex items-center gap-4" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.15)' }}>
-            <MessageSquare className="w-5 h-5 text-[#34D399]" />
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-3xl p-5 flex items-center gap-4 bg-white border border-purple-50 shadow-[0_8px_30px_rgba(99,102,241,0.06)] hover:shadow-[0_12px_40px_rgba(139,92,246,0.1)] transition-all">
+          <motion.div
+            animate={{ y: [0, -4, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+            className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-emerald-50 border border-emerald-100 text-emerald-600 shadow-xs"
+          >
+            <MessageSquare className="w-7 h-7" />
+          </motion.div>
           <div>
-            <p className="text-2xl font-black text-white">{reviews.length}</p>
-            <p className="text-[10px] text-[#9099A8] font-bold uppercase tracking-wider mt-0.5">Total Reviews</p>
+            <p className="text-2xl font-bold text-gray-900">{reviews.length}</p>
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">Total Reviews</p>
           </div>
         </div>
-        <div className="rounded-2xl p-5 flex items-center gap-4" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.15)' }}>
-            <Star className="w-5 h-5 text-[#F4B400]" />
-          </div>
+
+        <div className="rounded-3xl p-5 flex items-center gap-4 bg-white border border-purple-50 shadow-[0_8px_30px_rgba(99,102,241,0.06)] hover:shadow-[0_12px_40px_rgba(139,92,246,0.1)] transition-all">
+          <motion.div
+            animate={{ scale: [1, 1.12, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-amber-50 border border-amber-100 text-amber-500 shadow-xs"
+          >
+            <Star className="w-7 h-7 fill-amber-400" />
+          </motion.div>
           <div>
-            <p className="text-2xl font-black text-white">{avgRating}</p>
-            <p className="text-[10px] text-[#9099A8] font-bold uppercase tracking-wider mt-0.5">Avg Rating</p>
+            <p className="text-2xl font-bold text-gray-900">{avgRating} <span className="text-xs font-semibold text-gray-400">/ 5.0</span></p>
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">Avg Rating</p>
           </div>
         </div>
-        <div className="rounded-2xl p-5 flex items-center gap-4" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.15)' }}>
-            <Star className="w-5 h-5 text-[#F4B400]" />
+
+        <div className="rounded-3xl p-5 flex items-center gap-4 bg-white border border-purple-50 shadow-[0_8px_30px_rgba(99,102,241,0.06)] hover:shadow-[0_12px_40px_rgba(139,92,246,0.1)] transition-all">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-purple-50 border border-purple-100 text-[#8B5CF6] shadow-xs">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: 'linear',
+              }}
+              className="flex items-center justify-center"
+            >
+              <Sparkles className="w-7 h-7 text-[#8B5CF6]" />
+            </motion.div>
           </div>
           <div>
-            <p className="text-2xl font-black text-white">{reviews.filter(r => r.rating >= 4).length}</p>
-            <p className="text-[10px] text-[#9099A8] font-bold uppercase tracking-wider mt-0.5">4+ Stars</p>
+            <p className="text-2xl font-bold text-gray-900">{reviews.filter(r => r.rating >= 4).length}</p>
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">4+ Star Reviews</p>
           </div>
         </div>
       </div>
 
       {/* Reviews Grid */}
       {filtered.length === 0 ? (
-        <div
-          className="py-24 flex flex-col items-center justify-center rounded-2xl text-center px-6"
-          style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
-        >
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <StarOff className="w-8 h-8 text-[#9099A8]" />
+        <div className="py-24 flex flex-col items-center justify-center rounded-3xl text-center px-6 bg-white border border-purple-50 shadow-[0_12px_40px_rgba(99,102,241,0.08)]">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 bg-purple-50 border border-purple-100">
+            <StarOff className="w-8 h-8 text-[#8B5CF6]" />
           </div>
-          <h3 className="text-lg font-bold text-white mb-1">
+          <h3 className="text-lg font-bold text-gray-900 mb-1">
             {searchTerm ? 'No reviews match your search' : 'No reviews yet'}
           </h3>
-          <p className="text-[#9099A8] text-sm font-semibold">
+          <p className="text-gray-500 text-xs sm:text-sm font-normal max-w-sm">
             {searchTerm
-              ? `Try a different search term.`
-              : 'Reviews will appear here once customers leave feedback.'}
+              ? `Try adjusting your search criteria.`
+              : 'Reviews will appear here automatically as customers submit service feedback.'}
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <AnimatePresence mode="popLayout">
-            {filtered.map((review, i) => (
-              <motion.div
-                key={review.id}
-                layout
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ delay: i * 0.04 }}
-              >
-                <Card
-                  className="p-6 transition-all group relative overflow-hidden"
-                  style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+            {filtered.map((review, i) => {
+              const providerName = review.provider?.user?.name || review.providerName || 'Service Provider';
+              const reviewerName = review.user?.name || review.userName || 'Anonymous User';
+              const rating = review.rating || 5;
+              const comment = review.comment || review.text || 'No detailed feedback provided.';
+
+              return (
+                <motion.div
+                  key={review.id}
+                  layout
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: i * 0.04 }}
                 >
-                  <div className="flex justify-between items-start mb-4 relative z-10">
-                    <div>
-                      <p className="font-bold text-white">
-                        To: <span className="text-[#F4B400]">{review.provider?.user?.name || '—'}</span>
-                      </p>
-                      <p className="text-xs text-[#9099A8] font-semibold mt-0.5">
-                        From: {review.user?.name || '—'}
-                      </p>
+                  <Card className="p-6 rounded-3xl bg-white border border-purple-50 shadow-[0_8px_30px_rgba(99,102,241,0.06)] hover:shadow-[0_12px_40px_rgba(139,92,246,0.12)] transition-all group relative overflow-hidden">
+                    <div className="flex justify-between items-start mb-4 relative z-10">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-purple-50 border border-purple-100 text-[#8B5CF6] font-bold text-sm flex items-center justify-center shrink-0 shadow-xs">
+                          {reviewerName.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Provider: <span className="text-[#8B5CF6] font-extrabold">{providerName}</span>
+                          </p>
+                          <p className="text-sm font-bold text-gray-900 mt-0.5">
+                            {reviewerName}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleDelete(review.id)}
+                        disabled={deleting === review.id}
+                        title="Delete Review"
+                        className="p-2.5 rounded-2xl transition-all disabled:opacity-50 bg-red-50 text-red-500 border border-red-100 hover:bg-red-500 hover:text-white hover:border-red-500 cursor-pointer shadow-xs"
+                      >
+                        {deleting === review.id
+                          ? <Loader2 className="w-4 h-4 animate-spin" />
+                          : <Trash2 className="w-4 h-4" />}
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleDelete(review.id)}
-                      disabled={deleting === review.id}
-                      className="p-2 rounded-xl transition-all disabled:opacity-50"
-                      style={{ color: '#F87171', background: 'rgba(239,68,68,0.1)' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = '#EF4444'; e.currentTarget.style.color = '#fff'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.color = '#F87171'; }}
-                    >
-                      {deleting === review.id
-                        ? <Loader2 className="w-4 h-4 animate-spin" />
-                        : <Trash2 className="w-4 h-4" />}
-                    </button>
-                  </div>
 
-                  {/* Stars */}
-                  <div className="flex mb-3 items-center">
-                    <div className="flex mr-2">
-                      {[1, 2, 3, 4, 5].map(s => (
-                        <Star
-                          key={s}
-                          className={`w-4 h-4 ${s <= (review.rating || 0) ? 'fill-[#FBBF24] text-[#FBBF24]' : 'fill-white/10 text-white/10'}`}
-                        />
-                      ))}
+                    {/* Stars */}
+                    <div className="flex items-center gap-2 mb-3 px-3 py-1.5 rounded-xl bg-amber-50/60 border border-amber-100/60 w-fit">
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star
+                            key={s}
+                            className={`w-4 h-4 ${
+                              s <= rating ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-200'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-xs font-bold text-amber-700">{rating} / 5.0</span>
                     </div>
-                    <span className="text-xs font-bold text-[#9099A8]">{review.rating}/5</span>
-                  </div>
 
-                  <p className="text-[#C9CED6] italic leading-relaxed text-sm">
-                    "{review.comment || review.text || 'No comment'}"
-                  </p>
+                    {/* Comment */}
+                    <p className="text-xs sm:text-sm text-gray-700 font-normal italic leading-relaxed bg-[#FAFAFF] p-3.5 rounded-2xl border border-purple-50">
+                      "{comment}"
+                    </p>
 
-                  <div className="mt-4 text-[10px] text-[#9099A8]/60 font-bold uppercase tracking-wider">
-                    Review #{review.id}
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
+                    <div className="mt-4 flex items-center justify-between text-[10px] text-gray-400 font-bold uppercase tracking-wider pt-2 border-t border-purple-50">
+                      <span>Review #{review.id}</span>
+                      <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">Verified</span>
+                    </div>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </div>
       )}

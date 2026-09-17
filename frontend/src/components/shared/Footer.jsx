@@ -4,10 +4,9 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
   return (
     <footer
-      className="text-[#9099A8]"
+      className="text-gray-500 bg-white border-t border-purple-50 mt-16"
       style={{
-        background: 'linear-gradient(to bottom, #000000, #050505)',
-        borderTop: '1px solid rgba(255,255,255,0.07)',
+        boxShadow: '0 -8px 30px rgba(99, 102, 241, 0.04)',
       }}
     >
       {/* Main Grid */}
@@ -16,18 +15,18 @@ const Footer = () => {
 
           {/* Brand */}
           <div className="space-y-5">
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-3">
               <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg"
-                style={{ background: 'linear-gradient(135deg, #F4B400 0%, #FFC928 100%)' }}
+                className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-md"
+                style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)' }}
               >
-                <MapPin className="w-5 h-5 text-black" />
+                <MapPin className="w-5 h-5 text-white" />
               </div>
-              <h2 className="text-xl font-black text-white tracking-tight">
-                Panchayat<span className="text-[#F4B400]">.</span>
+              <h2 className="text-xl font-bold text-gray-900 tracking-tight">
+                Panchayat<span className="text-[#8B5CF6]">.</span>
               </h2>
             </div>
-            <p className="text-sm leading-relaxed text-[#9099A8]">
+            <p className="text-sm leading-relaxed text-gray-500 font-medium">
               Connecting communities with trusted local professionals for every service need — reliable, fast, and verified.
             </p>
             <div className="flex gap-3 pt-1">
@@ -39,22 +38,7 @@ const Footer = () => {
                   key={label}
                   href="#"
                   aria-label={label}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5"
-                  style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    color: '#9099A8',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.background = '#F4B400';
-                    e.currentTarget.style.color = '#000';
-                    e.currentTarget.style.borderColor = '#F4B400';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                    e.currentTarget.style.color = '#9099A8';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                  }}
+                  className="w-9 h-9 rounded-2xl flex items-center justify-center transition-all duration-200 hover:-translate-y-1 bg-purple-50 text-[#8B5CF6] hover:bg-[#8B5CF6] hover:text-white"
                 >
                   <Icon className="w-4 h-4" />
                 </a>
@@ -64,8 +48,8 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-base font-bold text-white mb-5">Quick Links</h3>
-            <ul className="space-y-3 text-sm">
+            <h3 className="text-base font-bold text-gray-900 mb-5">Quick Links</h3>
+            <ul className="space-y-3 text-sm font-medium">
               {[
                 { label: 'Home', href: '/' },
                 { label: 'Browse Services', href: '/services' },
@@ -75,7 +59,7 @@ const Footer = () => {
                 <li key={label}>
                   <Link
                     to={href}
-                    className="text-[#9099A8] hover:text-[#F4B400] hover:pl-1 transition-all duration-200 inline-block font-medium"
+                    className="text-gray-500 hover:text-[#8B5CF6] hover:pl-1 transition-all duration-200 inline-block"
                   >
                     {label}
                   </Link>
@@ -86,13 +70,13 @@ const Footer = () => {
 
           {/* Legal */}
           <div>
-            <h3 className="text-base font-bold text-white mb-5">Legal</h3>
-            <ul className="space-y-3 text-sm">
+            <h3 className="text-base font-bold text-gray-900 mb-5">Legal</h3>
+            <ul className="space-y-3 text-sm font-medium">
               {['Terms of Service', 'Privacy Policy', 'Refund Policy', 'Cookie Policy'].map((item) => (
                 <li key={item}>
                   <a
                     href="#"
-                    className="text-[#9099A8] hover:text-[#F4B400] hover:pl-1 transition-all duration-200 inline-block font-medium"
+                    className="text-gray-500 hover:text-[#8B5CF6] hover:pl-1 transition-all duration-200 inline-block"
                   >
                     {item}
                   </a>
@@ -103,36 +87,27 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h3 className="text-base font-bold text-white mb-5">Contact Us</h3>
-            <ul className="space-y-4 text-sm">
+            <h3 className="text-base font-bold text-gray-900 mb-5">Contact Us</h3>
+            <ul className="space-y-4 text-sm font-medium">
               <li className="flex items-start gap-3">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                  style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.2)' }}
-                >
-                  <MapPin className="w-4 h-4 text-[#F4B400]" />
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 bg-purple-50 border border-purple-100 text-[#8B5CF6]">
+                  <MapPin className="w-4 h-4" />
                 </div>
-                <span className="text-[#9099A8] leading-relaxed">123 Business Park, Mumbai, 400051</span>
+                <span className="text-gray-500 leading-relaxed">123 Business Park, Mumbai, 400051</span>
               </li>
               <li className="flex items-center gap-3">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.2)' }}
-                >
-                  <Phone className="w-4 h-4 text-[#F4B400]" />
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-purple-50 border border-purple-100 text-[#8B5CF6]">
+                  <Phone className="w-4 h-4" />
                 </div>
-                <a href="tel:+919876543210" className="text-[#9099A8] hover:text-[#F4B400] transition-colors font-medium">
+                <a href="tel:+919876543210" className="text-gray-500 hover:text-[#8B5CF6] transition-colors">
                   +91 98765 43210
                 </a>
               </li>
               <li className="flex items-center gap-3">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.2)' }}
-                >
-                  <Mail className="w-4 h-4 text-[#F4B400]" />
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-purple-50 border border-purple-100 text-[#8B5CF6]">
+                  <Mail className="w-4 h-4" />
                 </div>
-                <a href="mailto:support@panchayathub.com" className="text-[#9099A8] hover:text-[#F4B400] transition-colors font-medium">
+                <a href="mailto:support@panchayathub.com" className="text-gray-500 hover:text-[#8B5CF6] transition-colors">
                   support@panchayathub.com
                 </a>
               </li>
@@ -142,11 +117,11 @@ const Footer = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-[#9099A8]">
+      <div className="border-t border-purple-50 bg-[#FAFAFF]">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs font-medium text-gray-400">
           <p>© {new Date().getFullYear()} Panchayat Services. All rights reserved.</p>
           <p>
-            Built with <span className="text-[#F4B400]">♥</span> for local communities
+            Built with <span className="text-[#8B5CF6]">♥</span> for local communities
           </p>
         </div>
       </div>

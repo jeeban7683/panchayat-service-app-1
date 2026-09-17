@@ -76,10 +76,10 @@ export default function OAuthSuccess() {
         } else if (role === 'PROVIDER') {
           navigate('/provider/dashboard', { replace: true });
         } else if (role === 'USER') {
-          navigate('/landing', { replace: true });
+          navigate('/user/dashboard', { replace: true });
         } else {
           // fallback to landing
-          navigate('/landing', { replace: true });
+          navigate('/user/dashboard', { replace: true });
         }
       }, 0);
       return () => clearTimeout(timer);
@@ -107,7 +107,7 @@ export default function OAuthSuccess() {
     return (
       <div 
         className="min-h-screen flex items-center justify-center py-16 px-4" 
-        style={{ background: '#000000' }}
+        
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -118,7 +118,7 @@ export default function OAuthSuccess() {
           <div
             className="rounded-3xl p-8 sm:p-10 shadow-2xl text-center border"
             style={{
-              background: '#14181F',
+              background: '#FFFFFF',
               borderColor: 'rgba(239, 68, 68, 0.2)',
             }}
           >
@@ -129,14 +129,14 @@ export default function OAuthSuccess() {
               >
                 <AlertTriangle className="w-8 h-8 text-[#F87171]" />
               </div>
-              <h1 className="text-2xl font-black text-white mb-2">
+              <h1 className="text-2xl font-black text-gray-900 mb-2">
                 Google Login Failed
               </h1>
-              <p className="text-[#9099A8] text-sm leading-relaxed mb-6">
+              <p className="text-gray-500 text-sm leading-relaxed mb-6">
                 {error}
               </p>
-              <div className="text-xs text-[#9099A8]">
-                Redirecting you to the login page in <span className="text-[#F4B400] font-bold">{countdown}</span> seconds...
+              <div className="text-xs text-gray-500">
+                Redirecting you to the login page in <span className="text-[#8B5CF6] font-bold">{countdown}</span> seconds...
               </div>
             </div>
           </div>
@@ -148,12 +148,12 @@ export default function OAuthSuccess() {
   return (
     <div 
       className="min-h-screen flex items-center justify-center" 
-      style={{ background: '#000000' }}
+      
     >
       <div className="text-center flex flex-col items-center gap-4">
-        <Loader2 className="w-12 h-12 text-[#F4B400] animate-spin" />
-        <h2 className="text-xl font-bold text-white tracking-wide">Signing you in...</h2>
-        <p className="text-sm text-[#9099A8]">Please wait...</p>
+        <Loader2 className="w-12 h-12 text-[#8B5CF6] animate-spin" />
+        <h2 className="text-xl font-bold text-gray-900 tracking-wide">Signing you in...</h2>
+        <p className="text-sm text-gray-500">Please wait...</p>
       </div>
     </div>
   );

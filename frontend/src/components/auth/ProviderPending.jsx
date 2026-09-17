@@ -54,7 +54,7 @@ const ProviderPending = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-16" style={{ background: '#000000' }}>
+    <div className="min-h-screen flex items-center justify-center px-4 py-16" style={{ background: '#F5F3FF' }}>
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -62,7 +62,7 @@ const ProviderPending = () => {
         className="w-full max-w-lg"
       >
         {/* Card */}
-        <div className="rounded-3xl p-8 sm:p-10 text-center" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="rounded-3xl p-8 sm:p-10 text-center" style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}>
 
           {/* Icon */}
           <div className="flex justify-center mb-6">
@@ -94,7 +94,7 @@ const ProviderPending = () => {
           {/* Status Steps */}
           <div
             className="text-left space-y-0 mb-8 rounded-2xl overflow-hidden"
-            style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+            style={{ border: '1px solid rgba(139,92,246,0.08)' }}
           >
             {[
               { label: 'Account Created', done: true, color: '#34D399' },
@@ -199,7 +199,7 @@ const ProviderPending = () => {
             <button
               onClick={logout}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-[#9099A8] hover:text-white transition-all"
-              style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+              style={{ border: '1px solid rgba(139,92,246,0.08)' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >

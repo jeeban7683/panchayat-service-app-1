@@ -19,11 +19,15 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
@@ -48,7 +52,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(
+                List.of(frontendUrl));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization"));
@@ -76,6 +81,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/providers/**").permitAll()
 
+                        .requestMatchers("/uploads/**").permitAll()
+
                         .requestMatchers("/oauth2/**").permitAll()
 
                         .requestMatchers("/login/**").permitAll()
@@ -92,21 +99,16 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.POST,
                                 "/api/bookings").authenticated()
 
-                        .requestMatchers("/chat/**", "/ws/**").permitAll()
+                        .requestMatchers("/chat/**", "/ws/**", "/api/chat/**").permitAll()
 
                         .anyRequest().authenticated())
 
                 .oauth2Login(oauth -> oauth
-
-                        .userInfoEndpoint(user ->
-
-                                user.userService(customOAuth2UserService))
-
+                        .userInfoEndpoint(user -> user.userService(customOAuth2UserService))
                         .successHandler(oAuth2SuccessHandler))
 
                 .sessionManagement(session ->
-
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class);

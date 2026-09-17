@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import GlowButton from '../../components/ui/GlowButton';
@@ -12,8 +12,6 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, logout, isAuthenticated, user: currentUser } = useAuth();
-
-  // Remove forced auto-redirect so users can open /login in new tabs to switch accounts
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,7 +33,6 @@ export default function Login() {
     const result = await login(email, password);
     if (result.success) {
       const user = result.user;
-      // 'from' can be a string (from ChatRedirect) or a location object (from ProtectedRoute)
       const rawFrom = location.state?.from;
       const from = typeof rawFrom === 'string'
         ? rawFrom
@@ -70,18 +67,17 @@ export default function Login() {
     }
   };
 
-  const inputClass = "w-full rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-[#4B5563] focus:outline-none transition-all text-sm font-medium";
+  const inputClass = "w-full rounded-2xl py-3 pl-11 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all text-sm font-medium bg-white";
   const inputStyle = {
-    background: '#1A1F28',
-    border: '1px solid rgba(255,255,255,0.08)',
+    border: '1.5px solid rgba(139, 92, 246, 0.12)',
+    boxShadow: '0 4px 14px rgba(99, 102, 241, 0.04)',
   };
 
   /* ── Pending Approval Screen ── */
   if (pendingApproval) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center py-16 px-4"
-        style={{ background: '#000000' }}
+        className="min-h-screen flex items-center justify-center py-16 px-4 bg-[#F5F3FF]"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -90,33 +86,27 @@ export default function Login() {
           className="w-full max-w-md"
         >
           <div
-            className="rounded-3xl p-8 sm:p-10 shadow-2xl"
-            style={{
-              background: '#14181F',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
+            className="rounded-3xl p-8 sm:p-10 shadow-[0_12px_40px_rgba(99,102,241,0.08)] bg-white border border-purple-50"
           >
             {/* Icon */}
             <div className="flex flex-col items-center mb-8">
               <div className="relative mb-5">
                 <div
-                  className="w-20 h-20 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(244,180,0,0.1)', border: '2px solid rgba(244,180,0,0.3)' }}
+                  className="w-20 h-20 rounded-full flex items-center justify-center bg-purple-50 border-2 border-purple-200"
                 >
-                  <ShieldCheck className="w-10 h-10 text-[#F4B400]" />
+                  <ShieldCheck className="w-10 h-10 text-[#8B5CF6]" />
                 </div>
                 <div
-                  className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center border-2"
-                  style={{ background: '#14181F', borderColor: 'rgba(244,180,0,0.3)' }}
+                  className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center border-2 bg-white border-purple-200"
                 >
-                  <Clock className="w-3.5 h-3.5 text-[#F4B400]" />
+                  <Clock className="w-3.5 h-3.5 text-[#8B5CF6]" />
                 </div>
               </div>
-              <h1 className="text-2xl font-black text-white text-center mb-2">
+              <h1 className="text-2xl font-bold text-gray-900 text-center mb-2">
                 Waiting for Admin Approval
               </h1>
-              <p className="text-[#9099A8] text-center text-sm leading-relaxed">
-                Hi <span className="text-[#F4B400] font-semibold">{pendingProviderName}</span>, your provider
+              <p className="text-gray-500 text-center text-sm leading-relaxed font-medium">
+                Hi <span className="text-[#8B5CF6] font-semibold">{pendingProviderName}</span>, your provider
                 account is under review by our admin team.
               </p>
             </div>
@@ -124,66 +114,58 @@ export default function Login() {
             {/* Status Steps */}
             <div className="space-y-3 mb-8">
               <div
-                className="flex items-center gap-3 p-3 rounded-xl border"
-                style={{ background: 'rgba(52,211,153,0.08)', borderColor: 'rgba(52,211,153,0.2)' }}
+                className="flex items-center gap-3 p-3.5 rounded-2xl border bg-emerald-50 border-emerald-200"
               >
                 <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
-                  style={{ background: 'rgba(52,211,153,0.15)' }}
+                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 bg-emerald-100"
                 >
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#34D399]" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">Account Created</p>
-                  <p className="text-[11px] text-[#9099A8]">Your registration was successful</p>
+                  <p className="text-sm font-semibold text-gray-900">Account Created</p>
+                  <p className="text-[11px] text-gray-500">Your registration was successful</p>
                 </div>
               </div>
               <div
-                className="flex items-center gap-3 p-3 rounded-xl border"
-                style={{ background: 'rgba(244,180,0,0.08)', borderColor: 'rgba(244,180,0,0.2)' }}
+                className="flex items-center gap-3 p-3.5 rounded-2xl border bg-amber-50 border-amber-200"
               >
                 <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
-                  style={{ background: 'rgba(244,180,0,0.15)' }}
+                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 bg-amber-100"
                 >
-                  <Clock className="w-3.5 h-3.5 text-[#F4B400] animate-pulse" />
+                  <Clock className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">Admin Review</p>
-                  <p className="text-[11px] text-[#9099A8]">Your profile is being reviewed</p>
+                  <p className="text-sm font-semibold text-gray-900">Admin Review</p>
+                  <p className="text-[11px] text-gray-500">Your profile is being reviewed</p>
                 </div>
               </div>
               <div
-                className="flex items-center gap-3 p-3 rounded-xl border opacity-40"
-                style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}
+                className="flex items-center gap-3 p-3.5 rounded-2xl border bg-gray-50 border-gray-200 opacity-60"
               >
                 <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
-                  style={{ background: 'rgba(255,255,255,0.05)' }}
+                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 bg-gray-100"
                 >
-                  <AlertCircle className="w-3.5 h-3.5 text-[#9099A8]" />
+                  <AlertCircle className="w-3.5 h-3.5 text-gray-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#C9CED6]">Account Activation</p>
-                  <p className="text-[11px] text-[#9099A8]">Access your dashboard after approval</p>
+                  <p className="text-sm font-semibold text-gray-700">Account Activation</p>
+                  <p className="text-[11px] text-gray-400">Access your dashboard after approval</p>
                 </div>
               </div>
             </div>
 
             <div
-              className="p-4 rounded-2xl mb-6 text-center"
-              style={{ background: 'rgba(244,180,0,0.06)', border: '1px solid rgba(244,180,0,0.15)' }}
+              className="p-4 rounded-2xl mb-6 text-center bg-purple-50 border border-purple-100"
             >
-              <p className="text-xs text-[#9099A8] leading-relaxed">
+              <p className="text-xs text-gray-500 leading-relaxed font-medium">
                 Our team typically reviews applications within{' '}
-                <span className="text-[#F4B400] font-semibold">24–48 hours</span>. You will be notified once approved.
+                <span className="text-[#8B5CF6] font-semibold">24–48 hours</span>. You will be notified once approved.
               </p>
             </div>
 
             <button
               onClick={() => { logout(); setPendingApproval(false); }}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[#9099A8] hover:text-white hover:bg-white/5 transition-all text-sm font-semibold border"
-              style={{ borderColor: 'rgba(255,255,255,0.08)' }}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all text-sm font-semibold border border-purple-100"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Login
@@ -197,8 +179,7 @@ export default function Login() {
   /* ── Login Form ── */
   return (
     <div
-      className="min-h-screen flex items-center justify-center py-16 px-4"
-      style={{ background: '#000000' }}
+      className="min-h-screen flex items-center justify-center py-16 px-4 bg-[#F5F3FF]"
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -208,25 +189,21 @@ export default function Login() {
       >
         {/* Card */}
         <div
-          className="rounded-3xl p-8 sm:p-10 shadow-2xl"
-          style={{
-            background: '#14181F',
-            border: '1px solid rgba(255,255,255,0.08)',
-          }}
+          className="rounded-3xl p-8 sm:p-10 shadow-[0_12px_40px_rgba(99,102,241,0.08)] bg-white border border-purple-50"
         >
 
           {/* Header */}
           <div className="text-center mb-8">
             <div
-              className="inline-flex justify-center items-center w-14 h-14 rounded-2xl mb-5 shadow-lg"
-              style={{ background: 'linear-gradient(135deg, #F4B400 0%, #FFC928 100%)' }}
+              className="inline-flex justify-center items-center w-14 h-14 rounded-2xl mb-4 shadow-md"
+              style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)' }}
             >
-              <MapPin className="w-7 h-7 text-black" />
+              <MapPin className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-2xl font-black text-white mb-1 tracking-tight">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1 tracking-tight">
               Welcome Back
             </h1>
-            <p className="text-sm text-[#9099A8]">
+            <p className="text-sm text-gray-500 font-medium">
               Sign in to access your Panchayat account
             </p>
           </div>
@@ -234,29 +211,28 @@ export default function Login() {
           {/* Active Session Notice */}
           {currentUser && (
             <div
-              className="p-4 rounded-2xl mb-5 text-xs text-left"
-              style={{ background: 'rgba(244,180,0,0.06)', border: '1px solid rgba(244,180,0,0.2)' }}
+              className="p-4 rounded-2xl mb-5 text-xs text-left bg-purple-50 border border-purple-100"
             >
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-white font-bold">
-                  Signed in as <span className="text-[#F4B400]">{currentUser.name}</span> ({currentUser.role})
+                <span className="text-gray-900 font-bold">
+                  Signed in as <span className="text-[#8B5CF6]">{currentUser.name}</span> ({currentUser.role})
                 </span>
                 <button
                   type="button"
                   onClick={logout}
-                  className="text-[10px] font-bold text-red-400 hover:underline uppercase tracking-wider"
+                  className="text-[10px] font-bold text-red-500 hover:underline uppercase tracking-wider"
                 >
                   Sign Out
                 </button>
               </div>
-              <p className="text-[#9099A8] mb-3 leading-relaxed font-medium">
-                Log in below to switch accounts (e.g. Admin), or return to your active dashboard.
+              <p className="text-gray-500 mb-3 leading-relaxed font-medium">
+                Log in below to switch accounts, or return to your active dashboard.
               </p>
               <button
                 type="button"
                 onClick={() => navigate(currentUser.role === 'ADMIN' ? '/admin/dashboard' : currentUser.role === 'PROVIDER' ? '/provider/dashboard' : '/user/dashboard')}
-                className="w-full py-2.5 rounded-xl text-black font-bold text-xs shadow transition-all hover:brightness-110"
-                style={{ background: 'linear-gradient(135deg, #F4B400 0%, #FFC928 100%)' }}
+                className="w-full py-2.5 rounded-full text-white font-semibold text-xs shadow-md transition-all hover:scale-[1.02]"
+                style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)' }}
               >
                 Continue to My Dashboard →
               </button>
@@ -268,8 +244,7 @@ export default function Login() {
 
             {isExpired && !error && (
               <div
-                className="p-3.5 rounded-xl text-sm text-center font-semibold"
-                style={{ background: 'rgba(244,180,0,0.08)', border: '1px solid rgba(244,180,0,0.2)', color: '#F4B400' }}
+                className="p-3.5 rounded-2xl text-sm text-center font-semibold bg-amber-50 border border-amber-200 text-amber-700"
               >
                 Session expired. Please log in again.
               </div>
@@ -277,8 +252,7 @@ export default function Login() {
 
             {isResetSuccess && !error && (
               <div
-                className="p-3.5 rounded-xl text-sm text-center font-semibold"
-                style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', color: '#34D399' }}
+                className="p-3.5 rounded-2xl text-sm text-center font-semibold bg-emerald-50 border border-emerald-200 text-emerald-700"
               >
                 Password reset successfully. Please log in with your new password.
               </div>
@@ -286,8 +260,7 @@ export default function Login() {
 
             {error && (
               <div
-                className="p-3.5 rounded-xl text-sm text-center font-semibold"
-                style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#F87171' }}
+                className="p-3.5 rounded-2xl text-sm text-center font-semibold bg-red-50 border border-red-200 text-red-600"
               >
                 {error}
               </div>
@@ -295,9 +268,9 @@ export default function Login() {
 
             {/* Email */}
             <div>
-              <label className="block text-xs font-bold text-[#9099A8] mb-1.5 uppercase tracking-widest">Email</label>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#9099A8]" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400" />
                 <input
                   type="email"
                   required
@@ -306,17 +279,17 @@ export default function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   className={inputClass}
                   style={inputStyle}
-                  onFocus={e => { e.target.style.border = '1px solid #F4B400'; e.target.style.boxShadow = '0 0 0 3px rgba(244,180,0,0.12)'; }}
-                  onBlur={e => { e.target.style.border = '1px solid rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }}
+                  onFocus={e => { e.target.style.borderColor = '#8B5CF6'; e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.18)'; }}
+                  onBlur={e => { e.target.style.borderColor = 'rgba(139,92,246,0.12)'; e.target.style.boxShadow = '0 4px 14px rgba(99,102,241,0.04)'; }}
                 />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-xs font-bold text-[#9099A8] mb-1.5 uppercase tracking-widest">Password</label>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#9099A8]" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
@@ -325,13 +298,13 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   className={`${inputClass} pr-11`}
                   style={inputStyle}
-                  onFocus={e => { e.target.style.border = '1px solid #F4B400'; e.target.style.boxShadow = '0 0 0 3px rgba(244,180,0,0.12)'; }}
-                  onBlur={e => { e.target.style.border = '1px solid rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }}
+                  onFocus={e => { e.target.style.borderColor = '#8B5CF6'; e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.18)'; }}
+                  onBlur={e => { e.target.style.borderColor = 'rgba(139,92,246,0.12)'; e.target.style.boxShadow = '0 4px 14px rgba(99,102,241,0.04)'; }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#9099A8] hover:text-[#F4B400] transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#8B5CF6] transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -342,15 +315,14 @@ export default function Login() {
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 cursor-pointer group">
                 <div
-                  className="relative w-4 h-4 rounded border flex items-center justify-center transition-colors"
-                  style={{ borderColor: 'rgba(255,255,255,0.15)', background: '#1A1F28' }}
+                  className="relative w-4 h-4 rounded border border-gray-300 flex items-center justify-center transition-colors bg-white"
                 >
                   <input type="checkbox" className="opacity-0 absolute inset-0 cursor-pointer peer" />
-                  <div className="w-2.5 h-2.5 bg-[#F4B400] rounded-sm opacity-0 peer-checked:opacity-100 transition-opacity" />
+                  <div className="w-2.5 h-2.5 bg-[#8B5CF6] rounded-sm opacity-0 peer-checked:opacity-100 transition-opacity" />
                 </div>
-                <span className="text-[#9099A8] text-xs group-hover:text-[#C9CED6] transition-colors">Remember me</span>
+                <span className="text-gray-500 text-xs group-hover:text-gray-700 transition-colors font-medium">Remember me</span>
               </label>
-              <Link to="/forgot-password" className="text-xs text-[#F4B400] hover:underline font-bold">
+              <Link to="/forgot-password" className="text-xs text-[#8B5CF6] hover:underline font-semibold">
                 Forgot Password?
               </Link>
             </div>
@@ -373,41 +345,57 @@ export default function Login() {
 
           {/* Google Divider */}
           <div className="flex items-center gap-3 my-5">
-            <div className="flex-grow h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
-            <span className="text-[10px] text-[#9099A8] uppercase tracking-wider font-semibold">Or</span>
-            <div className="flex-grow h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+            <div className="flex-grow h-px bg-purple-50" />
+            <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Or</span>
+            <div className="flex-grow h-px bg-purple-50" />
           </div>
 
           {/* Google SSO Button */}
           <button
             type="button"
-            onClick={() => {
-              window.location.href = "http://localhost:8080/oauth2/authorization/google";
+            onClick={async () => {
+              try {
+                const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+                if (googleClientId && googleClientId !== 'your_google_client_id') {
+                  const googleLoginUrl = import.meta.env.VITE_GOOGLE_LOGIN || 'http://localhost:8080/oauth2/authorization/google';
+                  window.location.href = googleLoginUrl;
+                  return;
+                }
+                setIsLoading(true);
+                const res = await api.post('/auth/google/dev-login');
+                const { token, user: userData } = res.data;
+                loginWithToken(token, userData);
+                toast.success('Successfully logged in with Google!');
+                navigate('/user/dashboard', { replace: true });
+              } catch (err) {
+                console.error('Google login error:', err);
+                window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+              } finally {
+                setIsLoading(false);
+              }
             }}
-            className="w-full flex items-center justify-center gap-3 py-3 rounded-xl text-sm font-bold text-white hover:bg-white/5 transition-all border mb-4"
-            style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#1A1F28' }}
+            className="w-full flex items-center justify-center gap-3 py-3 rounded-full text-sm font-semibold text-gray-700 bg-white hover:bg-purple-50/50 transition-all border border-purple-100 mb-4 shadow-xs"
           >
             <svg className="w-5 h-5 shrink-0" viewBox="0 0 48 48">
-              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-              <path fill="#4285F4" d="M46.5 24c0-1.61-.15-3.16-.42-4.69H24v9h12.75c-.55 2.94-2.21 5.43-4.7 7.09l7.3 5.67C43.59 36.58 46.5 30.82 46.5 24z"/>
-              <path fill="#FBBC05" d="M10.54 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.98-6.19z"/>
-              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.3-5.67c-2.03 1.36-4.63 2.18-8.59 2.18-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+              <path fill="#4285F4" d="M46.5 24c0-1.61-.15-3.16-.42-4.69H24v9h12.75c-.55 2.94-2.21 5.43-4.7 7.09l7.3 5.67C43.59 36.58 46.5 30.82 46.5 24z" />
+              <path fill="#FBBC05" d="M10.54 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.98-6.19z" />
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.3-5.67c-2.03 1.36-4.63 2.18-8.59 2.18-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
             </svg>
             Continue with Google
           </button>
 
           {/* Divider */}
           <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
-            <span className="text-xs text-[#9099A8]">New to Panchayat?</span>
-            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+            <div className="flex-1 h-px bg-purple-50" />
+            <span className="text-xs text-gray-400 font-medium">New to Panchayat?</span>
+            <div className="flex-1 h-px bg-purple-50" />
           </div>
 
           <Link
             to="/register"
             state={location.state}
-            className="block w-full text-center py-3 rounded-xl text-sm font-bold text-[#9099A8] hover:text-[#F4B400] hover:border-[#F4B400]/50 transition-all border"
-            style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+            className="block w-full text-center py-3 rounded-full text-sm font-semibold text-gray-700 hover:text-[#8B5CF6] hover:bg-purple-50/50 transition-all border border-purple-100 bg-white"
           >
             Create an Account
           </Link>

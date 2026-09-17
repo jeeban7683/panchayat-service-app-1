@@ -11,16 +11,19 @@ import panchayat.backend.repository.ProviderRepository;
 import panchayat.backend.repository.UserRepository;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.util.List;
-
+import org.springframework.beans.factory.annotation.Value;
 @Service
 public class ProviderService {
-
+    @Value("${app.upload.path}")
+    private String uploadDirectory;
     @Autowired
     private ProviderRepository repo;
 
@@ -121,25 +124,6 @@ public class ProviderService {
         return repo.countByIsVerified(true);
     }
 
-    // ================= PROFILE PHOTO =================
-
-    public String uploadProfilePhoto(Long providerId,
-                                     MultipartFile file) {
-
-        ServiceProvider provider = repo.findById(providerId)
-                .orElseThrow(() ->
-                        new RuntimeException("Provider not found"));
-
-        // TODO : Save image into uploads folder
-
-        String imagePath = "uploads/profile/default.jpg";
-
-        provider.setProfileImage(imagePath);
-
-        repo.save(provider);
-
-        return imagePath;
-    }
 
     // ================= GET PROFILE =================
 
@@ -198,7 +182,13 @@ public class ProviderService {
 
         provider.setResponseTime(dto.getResponseTime());
 
-        provider.setProfileImage(dto.getProfileImage());
+        if (dto.getProfileImage() != null && !dto.getProfileImage().trim().isEmpty()) {
+            provider.setProfileImage(dto.getProfileImage());
+            if (user != null) {
+                user.setProfileImage(dto.getProfileImage());
+                userRepository.save(user);
+            }
+        }
 
         provider.setPortfolioImage1((String) dto.getPortfolioImage1());
         provider.setPortfolioImage2((String) dto.getPortfolioImage2());
@@ -208,6 +198,7 @@ public class ProviderService {
 
         return getProfile(providerId);
     }
+
     public String uploadPhoto(Long providerId, MultipartFile file) {
 
         try {
@@ -216,32 +207,40 @@ public class ProviderService {
                     .orElseThrow(() ->
                             new RuntimeException("Provider not found"));
 
-            String uploadDir = "uploads/profile/";
-
-            File directory = new File(uploadDir);
-
-            if (!directory.exists()) {
-                directory.mkdirs();
+            Path uploadPath = Paths.get(uploadDirectory)
+                    .toAbsolutePath()
+                    .normalize();
+            // Clear any file-as-folder collisions if a regular file named 'uploads' or 'profile' exists
+            Path parentDir = uploadPath.getParent();
+            if (parentDir != null && Files.exists(parentDir) && !Files.isDirectory(parentDir)) {
+                Files.delete(parentDir);
+            }
+            if (Files.exists(uploadPath) && !Files.isDirectory(uploadPath)) {
+                Files.delete(uploadPath);
             }
 
-            String fileName =
-                    System.currentTimeMillis()
-                            + "_"
-                            + file.getOriginalFilename();
+            // Explicitly create directory tree using NIO
+            Files.createDirectories(uploadPath);
 
-            Path filePath =
-                    Paths.get(uploadDir, fileName);
+            String originalName = file.getOriginalFilename();
+            String extension = ".jpg";
+            if (originalName != null && originalName.contains(".")) {
+                extension = originalName.substring(originalName.lastIndexOf("."));
+            }
 
-            Files.copy(
-                    file.getInputStream(),
-                    filePath,
-                    StandardCopyOption.REPLACE_EXISTING
-            );
+            String fileName = System.currentTimeMillis() + extension;
+            Path filePath = uploadPath.resolve(fileName);
 
-            String imagePath =
-                    "/uploads/profile/" + fileName;
+            // Write bytes directly
+            Files.write(filePath, file.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+            String imagePath = "/uploads/profile/" + fileName;
 
             provider.setProfileImage(imagePath);
+            if (provider.getUser() != null) {
+                provider.getUser().setProfileImage(imagePath);
+                userRepository.save(provider.getUser());
+            }
 
             repo.save(provider);
 
@@ -249,8 +248,11 @@ public class ProviderService {
 
         } catch (Exception e) {
 
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to upload profile photo: " + e.getMessage(), e);
 
         }
     }
+
+
 }
+

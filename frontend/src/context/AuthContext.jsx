@@ -62,9 +62,14 @@ export const AuthProvider = ({ children }) => {
       return loginResult;
     } catch (error) {
       setLoading(false);
+      const errorMessage =
+        error.response?.data?.message ||
+        (typeof error.response?.data === 'string' ? error.response.data : null) ||
+        error.message ||
+        'Registration failed. Please try again.';
       return {
         success: false,
-        message: error.response?.data?.message || 'Registration failed. Please try again.'
+        message: errorMessage
       };
     }
   };

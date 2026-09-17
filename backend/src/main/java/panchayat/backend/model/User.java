@@ -33,6 +33,9 @@ public class User {
     @JsonIgnoreProperties({"user"})
     private ServiceProvider provider;
 
+    private String profileImage;
+    private String address;
+
     private LocalDateTime createdAt;
 
     public Long getId() {
@@ -97,6 +100,22 @@ public class User {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }
 

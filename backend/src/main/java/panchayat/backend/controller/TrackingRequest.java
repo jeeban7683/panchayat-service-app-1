@@ -20,4 +20,19 @@ public class TrackingRequest {
         this.longitude = longitude;
     }
 
+    public Long getProviderId() {
+        this.providerId = providerId;
+
+        return 0L;
+    }
+
+    public Double getLatitude() {
+        this.latitude = latitude;
+        return latitude;
+    }
+
+    public Double getLongitude() {
+        this.longitude = longitude;
+        return longitude;
+    }
 }

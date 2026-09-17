@@ -88,24 +88,23 @@ export default function Register() {
     }
   };
 
-  const inputClass = "w-full rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-[#4B5563] focus:outline-none transition-all text-sm font-medium";
+  const inputClass = "w-full rounded-2xl py-3 pl-11 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all text-sm font-medium bg-white";
   const inputStyle = {
-    background: '#1A1F28',
-    border: '1px solid rgba(255,255,255,0.08)',
+    border: '1.5px solid rgba(139, 92, 246, 0.12)',
+    boxShadow: '0 4px 14px rgba(99, 102, 241, 0.04)',
   };
   const inputFocus = (e) => {
-    e.target.style.border = '1px solid #F4B400';
-    e.target.style.boxShadow = '0 0 0 3px rgba(244,180,0,0.12)';
+    e.target.style.borderColor = '#8B5CF6';
+    e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.18)';
   };
   const inputBlur = (e) => {
-    e.target.style.border = '1px solid rgba(255,255,255,0.08)';
-    e.target.style.boxShadow = 'none';
+    e.target.style.borderColor = 'rgba(139,92,246,0.12)';
+    e.target.style.boxShadow = '0 4px 14px rgba(99,102,241,0.04)';
   };
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center py-16 px-4"
-      style={{ background: '#000000' }}
+      className="min-h-screen flex items-center justify-center py-16 px-4 bg-[#F5F3FF]"
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -114,50 +113,47 @@ export default function Register() {
         className="w-full max-w-lg"
       >
         <div
-          className="rounded-3xl p-8 sm:p-10 shadow-2xl"
-          style={{
-            background: '#14181F',
-            border: '1px solid rgba(255,255,255,0.08)',
-          }}
+          className="rounded-3xl p-8 sm:p-10 shadow-[0_12px_40px_rgba(99,102,241,0.08)] bg-white border border-purple-50"
         >
 
           {/* Header */}
           <div className="text-center mb-8">
             <div
-              className="inline-flex justify-center items-center w-14 h-14 rounded-2xl mb-5 shadow-lg"
-              style={{ background: 'linear-gradient(135deg, #F4B400 0%, #FFC928 100%)' }}
+              className="inline-flex justify-center items-center w-14 h-14 rounded-2xl mb-4 shadow-md"
+              style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)' }}
             >
-              <MapPin className="w-7 h-7 text-black" />
+              <MapPin className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-2xl font-black text-white mb-1 tracking-tight">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1 tracking-tight">
               Join Panchayat
             </h1>
-            <p className="text-sm text-[#9099A8]">
+            <p className="text-sm text-gray-500 font-medium">
               Create your account and get started today
             </p>
           </div>
 
           {/* Role Selection */}
-          <div className="grid grid-cols-3 gap-2 mb-8">
+          <div className="grid grid-cols-3 gap-2.5 mb-8">
             {ROLE_OPTIONS.map(({ value, label, icon: Icon, desc }) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => setRole(value)}
-                className="relative flex flex-col items-center py-3 px-2 rounded-xl border-2 transition-all text-center"
+                className="relative flex flex-col items-center py-3.5 px-2 rounded-2xl border-2 transition-all text-center"
                 style={role === value ? {
-                  borderColor: '#F4B400',
-                  background: 'rgba(244,180,0,0.08)',
-                  color: '#F4B400',
+                  borderColor: '#8B5CF6',
+                  background: '#F3F0FF',
+                  color: '#8B5CF6',
+                  boxShadow: '0 4px 14px rgba(139,92,246,0.1)',
                 } : {
-                  borderColor: 'rgba(255,255,255,0.08)',
-                  background: 'rgba(255,255,255,0.02)',
-                  color: '#9099A8',
+                  borderColor: 'rgba(139,92,246,0.12)',
+                  background: '#FFFFFF',
+                  color: '#6B7280',
                 }}
               >
                 <Icon className="w-5 h-5 mb-1 shrink-0" />
                 <span className="text-xs font-bold truncate w-full text-center">{label}</span>
-                <span className={cn('text-[10px] mt-0.5 hidden sm:block truncate', role === value ? 'text-[#F4B400]/70' : 'text-[#9099A8]')}>
+                <span className={cn('text-[10px] mt-0.5 hidden sm:block truncate font-medium', role === value ? 'text-[#8B5CF6]' : 'text-gray-400')}>
                   {desc}
                 </span>
               </button>
@@ -168,8 +164,7 @@ export default function Register() {
           <form className="space-y-4" onSubmit={handleSubmit}>
             {error && (
               <div
-                className="p-3.5 rounded-xl text-sm text-center font-semibold"
-                style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#F87171' }}
+                className="p-3.5 rounded-2xl text-sm text-center font-semibold bg-red-50 border border-red-200 text-red-600"
               >
                 {error}
               </div>
@@ -178,16 +173,16 @@ export default function Register() {
             {/* Name row */}
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-[#9099A8] mb-1.5 uppercase tracking-widest">First Name</label>
+                <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">First Name</label>
                 <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#9099A8]" />
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400" />
                   <input type="text" name="firstName" required placeholder="First Name" value={formData.firstName} onChange={handleInputChange} className={inputClass} style={inputStyle} onFocus={inputFocus} onBlur={inputBlur} />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-[#9099A8] mb-1.5 uppercase tracking-widest">Last Name</label>
+                <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Last Name</label>
                 <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#9099A8]" />
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400" />
                   <input type="text" name="lastName" required placeholder="Last Name" value={formData.lastName} onChange={handleInputChange} className={inputClass} style={inputStyle} onFocus={inputFocus} onBlur={inputBlur} />
                 </div>
               </div>
@@ -195,29 +190,29 @@ export default function Register() {
 
             {/* Phone */}
             <div>
-              <label className="block text-xs font-bold text-[#9099A8] mb-1.5 uppercase tracking-widest">Phone</label>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Phone</label>
               <div className="relative">
-                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#9099A8]" />
+                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400" />
                 <input type="tel" name="phone" required placeholder="Phone Number" value={formData.phone} onChange={handleInputChange} className={inputClass} style={inputStyle} onFocus={inputFocus} onBlur={inputBlur} />
               </div>
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-xs font-bold text-[#9099A8] mb-1.5 uppercase tracking-widest">Email</label>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#9099A8]" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400" />
                 <input type="email" name="email" required placeholder="Email Address" value={formData.email} onChange={handleInputChange} className={inputClass} style={inputStyle} onFocus={inputFocus} onBlur={inputBlur} />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-xs font-bold text-[#9099A8] mb-1.5 uppercase tracking-widest">
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">
                 {role === 'admin' ? 'Admin Secret Password' : 'Password'}
               </label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#9099A8]" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400" />
                 <input type="password" name="password" required placeholder={role === 'admin' ? 'Enter Admin Secret' : 'Create Password'} value={formData.password} onChange={handleInputChange} className={inputClass} style={inputStyle} onFocus={inputFocus} onBlur={inputBlur} />
               </div>
             </div>
@@ -225,8 +220,7 @@ export default function Register() {
             {/* Admin notice */}
             {role === 'admin' && (
               <div
-                className="p-3.5 rounded-xl text-xs text-center leading-relaxed font-semibold"
-                style={{ background: 'rgba(244,180,0,0.06)', border: '1px solid rgba(244,180,0,0.2)', color: '#F4B400' }}
+                className="p-3.5 rounded-2xl text-xs text-center leading-relaxed font-semibold bg-purple-50 border border-purple-100 text-[#8B5CF6]"
               >
                 ⚠️ Admin registration requires the unique Admin Secret Password.
               </div>
@@ -239,32 +233,32 @@ export default function Register() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="space-y-4 overflow-hidden"
+                  className="space-y-4 overflow-hidden pt-1"
                 >
                   <div>
-                    <label className="block text-xs font-bold text-[#9099A8] mb-1.5 uppercase tracking-widest">License / ID</label>
+                    <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">License / ID</label>
                     <div className="relative">
-                      <Shield className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#9099A8]" />
+                      <Shield className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400" />
                       <input type="text" name="licenseId" required={role === 'provider'} placeholder="Professional License / ID" value={formData.licenseId} onChange={handleInputChange} className={inputClass} style={inputStyle} onFocus={inputFocus} onBlur={inputBlur} />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#9099A8] mb-1.5 uppercase tracking-widest">Service Area</label>
+                    <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Service Area</label>
                     <div className="relative">
-                      <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#9099A8]" />
+                      <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400" />
                       <select
                         name="serviceId"
                         required={role === 'provider'}
                         value={serviceId}
                         onChange={(e) => setServiceId(e.target.value)}
-                        className="w-full rounded-xl py-3 pl-11 pr-4 text-white focus:outline-none transition-all text-sm font-medium cursor-pointer"
+                        className="w-full rounded-2xl py-3 pl-11 pr-4 text-gray-900 focus:outline-none transition-all text-sm font-medium cursor-pointer bg-white"
                         style={inputStyle}
                         onFocus={inputFocus}
                         onBlur={inputBlur}
                       >
-                        <option value="" disabled style={{ color: '#4B5563', background: '#14181F' }}>Select Service Area</option>
+                        <option value="" disabled className="text-gray-400 bg-white">Select Service Area</option>
                         {services.map(service => (
-                          <option key={service.id} value={service.id} style={{ background: '#14181F' }}>{service.name}</option>
+                          <option key={service.id} value={service.id} className="bg-white text-gray-900">{service.name}</option>
                         ))}
                       </select>
                     </div>
@@ -272,9 +266,9 @@ export default function Register() {
 
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-[#9099A8] mb-1.5 uppercase tracking-widest">Years of Experience</label>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Years of Experience</label>
                       <div className="relative">
-                        <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#9099A8]" />
+                        <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400" />
                         <input
                           type="number"
                           name="experience"
@@ -292,25 +286,25 @@ export default function Register() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-[#9099A8] mb-1.5 uppercase tracking-widest">Response Time</label>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Response Time</label>
                       <div className="relative">
-                        <Shield className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#9099A8]" />
+                        <Shield className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400" />
                         <select
                           name="responseTime"
                           required={role === 'provider'}
                           value={formData.responseTime}
                           onChange={handleInputChange}
-                          className="w-full rounded-xl py-3 pl-11 pr-4 text-white focus:outline-none transition-all text-sm font-medium cursor-pointer"
+                          className="w-full rounded-2xl py-3 pl-11 pr-4 text-gray-900 focus:outline-none transition-all text-sm font-medium cursor-pointer bg-white"
                           style={inputStyle}
                           onFocus={inputFocus}
                           onBlur={inputBlur}
                         >
-                          <option value="" disabled style={{ background: '#14181F' }}>Select response time</option>
-                          <option value="Within 30 minutes" style={{ background: '#14181F' }}>Within 30 minutes</option>
-                          <option value="Within 1 hour" style={{ background: '#14181F' }}>Within 1 hour</option>
-                          <option value="Within 2 hours" style={{ background: '#14181F' }}>Within 2 hours</option>
-                          <option value="Same day" style={{ background: '#14181F' }}>Same day</option>
-                          <option value="Next day" style={{ background: '#14181F' }}>Next day</option>
+                          <option value="" disabled className="bg-white text-gray-400">Select response time</option>
+                          <option value="Within 30 minutes" className="bg-white text-gray-900">Within 30 minutes</option>
+                          <option value="Within 1 hour" className="bg-white text-gray-900">Within 1 hour</option>
+                          <option value="Within 2 hours" className="bg-white text-gray-900">Within 2 hours</option>
+                          <option value="Same day" className="bg-white text-gray-900">Same day</option>
+                          <option value="Next day" className="bg-white text-gray-900">Next day</option>
                         </select>
                       </div>
                     </div>
@@ -336,16 +330,15 @@ export default function Register() {
 
           {/* Divider */}
           <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
-            <span className="text-xs text-[#9099A8]">Already have an account?</span>
-            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+            <div className="flex-1 h-px bg-purple-50" />
+            <span className="text-xs text-gray-400 font-medium">Already have an account?</span>
+            <div className="flex-1 h-px bg-purple-50" />
           </div>
 
           <Link
             to="/login"
             state={location.state}
-            className="block w-full text-center py-3 rounded-xl text-sm font-bold text-[#9099A8] hover:text-[#F4B400] transition-all border"
-            style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+            className="block w-full text-center py-3 rounded-full text-sm font-semibold text-gray-700 hover:text-[#8B5CF6] hover:bg-purple-50/50 transition-all border border-purple-100 bg-white"
           >
             Sign In Instead
           </Link>

@@ -11,13 +11,23 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import org.springframework.beans.factory.annotation.Value;
 
 @Component
 public class JwtUtil {
+    @Value("${jwt.secret}")
+    private String secret;
 
+    @Value("${jwt.expiration}")
+    private long jwtExpiration;
+    private SecretKey getSigningKey() {
+
+        return Keys.hmacShaKeyFor(
+                secret.getBytes(StandardCharsets.UTF_8)
+        );
+
+    }
     // A secret key of at least 256 bits (32 bytes) for HMAC-SHA256
-    private final String SECRET_KEY = "panchayat_secret_key_must_be_at_least_32_bytes_long_for_hmac_sha256";
-    private final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
@@ -25,12 +35,12 @@ public class JwtUtil {
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
+
         return Jwts.builder()
                 .claims(claims)
                 .subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
-                .signWith(key)
+                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -53,8 +63,9 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
+
         return Jwts.parser()
-                .verifyWith(key)
+                .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

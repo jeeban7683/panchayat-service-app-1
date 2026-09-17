@@ -21,7 +21,7 @@ const getStatusStyle = (status) => {
     case 'CANCELLED':
       return 'bg-red-500/10 text-[#F87171] border-red-500/25';
     default:
-      return 'bg-[#F4B400]/10 text-[#FBBF24] border-[#F4B400]/25';
+      return 'bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/25';
   }
 };
 
@@ -82,8 +82,8 @@ const ProviderJobs = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-4 text-[#9099A8]">
-        <Loader2 className="w-10 h-10 text-[#F4B400] animate-spin" />
+      <div className="flex flex-col items-center justify-center py-20 gap-4 text-gray-500">
+        <Loader2 className="w-10 h-10 text-[#8B5CF6] animate-spin" />
         <p className="text-sm font-medium">Loading your jobs...</p>
       </div>
     );
@@ -93,36 +93,36 @@ const ProviderJobs = () => {
     <div className="max-w-6xl mx-auto space-y-6 py-8 px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black text-white tracking-tight">My Jobs</h1>
-          <p className="text-[#9099A8] text-sm mt-1">Track your active and completed services.</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">My Jobs</h1>
+          <p className="text-gray-500 text-sm mt-1 font-normal">Track your active and completed services.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9099A8] w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
             <input
               type="text"
               placeholder="Search jobs..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl text-white placeholder-[#4B5563] outline-none transition-all text-sm font-medium"
-              style={{ background: '#1A1F28', border: '1px solid rgba(255,255,255,0.08)' }}
-              onFocus={e => { e.target.style.borderColor = '#F4B400'; e.target.style.boxShadow = '0 0 0 3px rgba(244,180,0,0.12)'; }}
-              onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }}
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl text-gray-900 font-medium placeholder:text-gray-400 outline-none transition-all text-sm"
+              style={{ background: '#FFFFFF', border: '1.5px solid rgba(139,92,246,0.12)' }}
+              onFocus={e => { e.target.style.borderColor = '#8B5CF6'; e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.15)'; }}
+              onBlur={e => { e.target.style.borderColor = 'rgba(139,92,246,0.12)'; e.target.style.boxShadow = 'none'; }}
             />
           </div>
-          <div className="flex p-1 rounded-xl w-fit" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="flex p-1 rounded-xl w-fit" style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}>
             {['ALL', 'PENDING', 'ACTIVE', 'COMPLETED'].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
-                className="px-4 py-2 text-xs font-bold rounded-lg transition-colors"
+                className="px-4 py-2 text-xs font-medium rounded-lg transition-colors"
                 style={filter === status ? {
-                  background: '#F4B400',
-                  color: '#000',
-                  boxShadow: '0 2px 8px rgba(244,180,0,0.2)'
+                  background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)',
+                  color: '#FFFFFF',
+                  boxShadow: '0 2px 8px rgba(139,92,246,0.2)'
                 } : {
-                  color: '#9099A8'
+                  color: '#6B7280'
                 }}
               >
                 {status.charAt(0) + status.slice(1).toLowerCase()}
@@ -135,8 +135,8 @@ const ProviderJobs = () => {
       <div className="space-y-4 mt-6">
         {filteredJobs.length === 0 ? (
           <div
-            className="text-center py-16 text-[#9099A8] rounded-2xl font-medium"
-            style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+            className="text-center py-16 text-gray-500 rounded-2xl font-medium"
+            style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}
           >
             No jobs found matching your criteria.
           </div>
@@ -150,30 +150,30 @@ const ProviderJobs = () => {
             >
               <Card
                 className="p-5 sm:p-6 transition-all duration-300"
-                style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+                style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}
               >
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-bold text-white text-lg">{job.service?.name}</h3>
-                      <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider ${getStatusStyle(job.status)}`}>
+                      <h3 className="font-semibold text-gray-900 text-lg">{job.service?.name}</h3>
+                      <span className={`px-2.5 py-1 rounded-md text-[10px] font-medium border uppercase tracking-wider ${getStatusStyle(job.status)}`}>
                         {job.status}
                       </span>
                     </div>
-                    <p className="text-[#9099A8] font-semibold text-sm mb-3">for <span className="text-white font-bold">{job.user?.name || 'Customer'}</span></p>
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-[#9099A8] font-semibold">
-                      <span className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-[#9099A8]" /> ID: #{job.id}</span>
-                      <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-[#9099A8]" /> {job.user?.phone || 'No phone'}</span>
+                    <p className="text-gray-500 font-medium text-sm mb-3">for <span className="text-gray-900 font-semibold">{job.user?.name || 'Customer'}</span></p>
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 font-medium">
+                      <span className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-gray-500" /> ID: #{job.id}</span>
+                      <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-gray-500" /> {job.user?.phone || 'No phone'}</span>
                     </div>
                   </div>
                   
                   <div
                     className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center pt-4 sm:pt-0 sm:pl-8 shrink-0 gap-4 w-full sm:w-auto"
-                    style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
+                    style={{ borderTop: '1px solid rgba(139,92,246,0.08)' }}
                   >
                     <div className="text-left sm:text-right">
-                      <div className="text-2xl font-black text-white">₹{user.provider?.price || '0'}</div>
-                      <div className="text-[10px] text-[#9099A8] font-bold uppercase tracking-wider">starting price</div>
+                      <div className="text-2xl font-bold text-gray-900">₹{user.provider?.price || '0'}</div>
+                      <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">starting price</div>
                     </div>
                     
                     <div className="flex gap-2 w-fit">
@@ -189,7 +189,7 @@ const ProviderJobs = () => {
                             Accept
                           </GlowButton>
                           <button 
-                            className="px-4 py-2 text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5"
+                            className="px-4 py-2 text-xs font-medium rounded-xl transition-colors flex items-center gap-1.5"
                             style={{ background: 'rgba(239,68,68,0.1)', color: '#F87171', border: '1px solid rgba(239,68,68,0.25)' }}
                             onClick={() => handleAction(job.id, rejectBooking)}
                             disabled={actionLoading === job.id}

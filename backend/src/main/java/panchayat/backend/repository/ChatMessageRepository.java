@@ -17,8 +17,13 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             @Param("senderId") Long senderId,
             @Param("receiverId") Long receiverId);
 
-    @Query("SELECT DISTINCT CASE WHEN m.senderId = :userId THEN m.receiverId ELSE m.senderId END " +
-           "FROM ChatMessage m WHERE m.senderId = :userId OR m.receiverId = :userId")
+    @Query(value = "SELECT partner_id FROM (" +
+                   "  SELECT (CASE WHEN sender_id = :userId THEN receiver_id ELSE sender_id END) AS partner_id, MAX(timestamp) AS max_time " +
+                   "  FROM chat_messages " +
+                   "  WHERE sender_id = :userId OR receiver_id = :userId " +
+                   "  GROUP BY (CASE WHEN sender_id = :userId THEN receiver_id ELSE sender_id END) " +
+                   "  ORDER BY max_time DESC" +
+                   ") sub", nativeQuery = true)
     List<Long> findConversationPartnerIds(@Param("userId") Long userId);
 
     long countBySenderIdAndReceiverIdAndReadFalse(Long senderId, Long receiverId);

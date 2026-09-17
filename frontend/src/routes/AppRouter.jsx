@@ -55,7 +55,7 @@ const ChatRedirect = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#000000' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#F5F3FF' }}>
         <Loader2 className="w-10 h-10 text-[#F4B400] animate-spin" />
       </div>
     );
@@ -95,7 +95,7 @@ const ProfileRedirect = () => {
 };
 
 const PublicLayout = () => (
-  <div className="min-h-screen flex flex-col" style={{ background: '#000000' }}>
+  <div className="min-h-screen flex flex-col" style={{ background: '#F5F3FF' }}>
     <Navbar />
     <main className="flex-grow">
       <Outlet />
@@ -107,7 +107,7 @@ const PublicLayout = () => (
 );
 
 const DashboardLayout = ({ role }) => (
-  <div className="min-h-screen flex" style={{ background: '#000000' }}>
+  <div className="min-h-screen flex" style={{ background: '#F5F3FF' }}>
     <Sidebar role={role} />
     <div className="flex-1 flex flex-col overflow-hidden">
       <main className="flex-1 overflow-y-auto p-6 pt-16">

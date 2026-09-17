@@ -31,6 +31,9 @@ public class CustomOAuth2UserService
         String email = oAuth2User.getAttribute("email");
 
         String name = oAuth2User.getAttribute("name");
+        if (name == null || name.trim().isEmpty()) {
+            name = email != null ? email.split("@")[0] : "Google User";
+        }
 
         User user = userRepository
                 .findByEmail(email)

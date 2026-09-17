@@ -23,7 +23,7 @@ const Offline = () => {
           <WifiOff className="w-12 h-12 text-red-400" />
         </div>
         
-        <h1 className="text-3xl font-bold text-white mb-4">You're Offline</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">You're Offline</h1>
         <p className="text-slate-400 mb-8 leading-relaxed">
           It looks like you've lost your connection. Please check your internet settings and try again.
         </p>

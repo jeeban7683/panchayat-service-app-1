@@ -1,8 +1,15 @@
 import axios from 'axios';
 
 // Create an Axios instance
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  return 'http://localhost:8080/api';
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
+  baseURL: getApiBaseUrl(),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -33,9 +40,9 @@ api.interceptors.response.use(
       // Clear authentication details
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      
+
       // Redirect to login page with expired flag to display session expired message
-      window.location.href = '/login?expired=true';
+      window.location.href = "/login?expired=true";
     }
     return Promise.reject(error);
   }
@@ -47,9 +54,14 @@ export const getImageUrl = (path) => {
     return path;
   }
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
-  const origin = baseUrl.replace(/\/api\/?$/, '');
-  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-  return `${origin}/${cleanPath}`;
+  let origin = '';
+  if (baseUrl.startsWith('http://') || baseUrl.startsWith('https://')) {
+    origin = baseUrl.replace(/\/api\/?$/, '');
+  } else if (typeof window !== 'undefined') {
+    origin = window.location.origin;
+  }
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${origin}${cleanPath}`;
 };
 
 export default api;

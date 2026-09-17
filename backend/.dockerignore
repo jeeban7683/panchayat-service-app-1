@@ -1,0 +1,10 @@
+.idea
+.git
+.gitignore
+*.log
+hs_err_pid*
+replay_pid*
+node_modules
+Dockerfile.old
+Dockerfile.txt
+uploads

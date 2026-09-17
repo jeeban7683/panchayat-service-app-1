@@ -26,12 +26,12 @@ import Card from '../../components/ui/Card';
 // ─── Stat Card ───────────────────────────────────────────────────────────────
 const StatCard = ({ icon: Icon, label, value, style }) => (
   <div className="rounded-2xl p-5 flex items-center gap-4" style={style}>
-    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(139,92,246,0.08)' }}>
       <Icon className="w-5 h-5" />
     </div>
     <div>
-      <p className="text-2xl font-black">{value}</p>
-      <p className="text-[10px] opacity-60 font-bold uppercase tracking-wider mt-0.5">{label}</p>
+      <p className="text-2xl font-bold text-gray-900">{value}</p>
+      <p className="text-[10px] text-gray-500 font-medium uppercase tracking-wider mt-0.5">{label}</p>
     </div>
   </div>
 );
@@ -54,47 +54,47 @@ const ProviderCard = ({ provider, onVerify, onReject, actionLoading, onClickDeta
       transition={{ duration: 0.25 }}
       onClick={() => onClickDetails(provider)}
       className="rounded-2xl p-6 transition-all group relative overflow-hidden cursor-pointer"
-      style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}
+      style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}
     >
       <div className="relative z-10 flex flex-col sm:flex-row items-start gap-5">
         {/* Avatar */}
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shrink-0" style={{ background: '#F4B400', color: '#000' }}>
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-semibold shrink-0" style={{ background: '#8B5CF6', color: '#000' }}>
           {initials}
         </div>
 
         {/* Details */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1">
-            <h3 className="text-lg font-bold text-white group-hover:text-[#F4B400] transition-colors truncate">{providerName}</h3>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#F4B400]/10 text-[#FBBF24] border border-[#F4B400]/25">
+            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-[#8B5CF6] transition-colors truncate">{providerName}</h3>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/25">
               <Clock className="w-2.5 h-2.5" /> Pending Approval
             </span>
           </div>
 
-          <div className="flex flex-wrap gap-4 mt-3 text-xs text-[#9099A8] font-semibold">
+          <div className="flex flex-wrap gap-4 mt-3 text-xs text-gray-700 font-medium">
             <span className="flex items-center gap-1.5">
-              <Briefcase className="w-3.5 h-3.5 text-[#F4B400]" />
-              <span className="text-[#C9CED6]">{serviceName}</span>
+              <Briefcase className="w-3.5 h-3.5 text-[#8B5CF6]" />
+              <span className="text-gray-900 font-semibold">{serviceName}</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <UserCheck className="w-3.5 h-3.5 text-purple-450" />
-              <span>{experience} yrs experience</span>
+              <UserCheck className="w-3.5 h-3.5 text-purple-600" />
+              <span className="text-gray-900 font-semibold">{experience} yrs experience</span>
             </span>
             <span className="flex items-center gap-1.5">
               <DollarSign className="w-3.5 h-3.5 text-[#34D399]" />
-              <span>₹{price} / hr</span>
+              <span className="text-emerald-700 font-semibold">₹{price} / hr</span>
             </span>
           </div>
 
           <div className="flex items-center gap-3 mt-3">
             {provider.user?.email && (
-              <span className="text-xs text-[#9099A8] flex items-center gap-1 font-medium">
-                <Mail className="w-3 h-3 text-[#9099A8]/60" /> {provider.user.email}
+              <span className="text-xs text-gray-600 flex items-center gap-1 font-normal">
+                <Mail className="w-3 h-3 text-purple-600" /> {provider.user.email}
               </span>
             )}
             {provider.user?.phone && (
-              <span className="text-xs text-[#9099A8] flex items-center gap-1 font-medium">
-                <Phone className="w-3 h-3 text-[#9099A8]/60" /> {provider.user.phone}
+              <span className="text-xs text-gray-600 flex items-center gap-1 font-normal">
+                <Phone className="w-3 h-3 text-purple-600" /> {provider.user.phone}
               </span>
             )}
           </div>
@@ -105,7 +105,7 @@ const ProviderCard = ({ provider, onVerify, onReject, actionLoading, onClickDeta
           <button
             onClick={() => onVerify(provider.id)}
             disabled={isLoading}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ background: 'rgba(52,211,153,0.1)', color: '#34D399', border: '1px solid rgba(52,211,153,0.25)' }}
             onMouseEnter={e => { e.currentTarget.style.background = '#10B981'; e.currentTarget.style.color = '#fff'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'rgba(52,211,153,0.1)'; e.currentTarget.style.color = '#34D399'; }}
@@ -120,7 +120,7 @@ const ProviderCard = ({ provider, onVerify, onReject, actionLoading, onClickDeta
           <button
             onClick={() => onReject(provider.id)}
             disabled={isLoading}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ background: 'rgba(239,68,68,0.1)', color: '#F87171', border: '1px solid rgba(239,68,68,0.25)' }}
             onMouseEnter={e => { e.currentTarget.style.background = '#EF4444'; e.currentTarget.style.color = '#fff'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.color = '#F87171'; }}
@@ -154,13 +154,11 @@ const DetailsModal = ({ provider, onClose, onVerify, onReject, actionLoading }) 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="absolute inset-0 bg-black/60 backdrop-blur-md"
-      />
+        <div
+          onClick={onClose}
+          className="absolute inset-0"
+          style={{ background: 'rgba(17,24,39,0.5)' }}
+        />
 
       {/* Modal Box */}
       <motion.div
@@ -168,13 +166,13 @@ const DetailsModal = ({ provider, onClose, onVerify, onReject, actionLoading }) 
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         className="relative w-full max-w-2xl border rounded-3xl overflow-hidden shadow-2xl z-10 text-white"
-        style={{ background: '#11151B', borderColor: 'rgba(255,255,255,0.08)' }}
+        style={{ background: '#11151B', borderColor: 'rgba(139,92,246,0.08)' }}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-[#9099A8] hover:text-white p-2 rounded-xl transition-all z-20"
-          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
+          className="absolute top-5 right-5 text-gray-500 hover:text-white p-2 rounded-xl transition-all z-20"
+          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(139,92,246,0.08)' }}
         >
           <X className="w-5 h-5" />
         </button>
@@ -184,17 +182,17 @@ const DetailsModal = ({ provider, onClose, onVerify, onReject, actionLoading }) 
           
           {/* Main Title & Avatar */}
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black" style={{ background: '#F4B400', color: '#000' }}>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-semibold" style={{ background: '#8B5CF6', color: '#000' }}>
               {initials}
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-2xl font-black text-white">{providerName}</h2>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#F4B400]/10 text-[#FBBF24] border border-[#F4B400]/25">
+                <h2 className="text-2xl font-bold text-gray-900">{providerName}</h2>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/25">
                   <Clock className="w-2.5 h-2.5" /> Pending
                 </span>
               </div>
-              <p className="text-[#9099A8] text-sm font-semibold">Professional profile verification application.</p>
+              <p className="text-gray-500 text-sm font-normal">Professional profile verification application.</p>
             </div>
           </div>
 
@@ -205,31 +203,31 @@ const DetailsModal = ({ provider, onClose, onVerify, onReject, actionLoading }) 
 
             {/* Column Left: Job Info */}
             <div className="space-y-4">
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#9099A8] mb-1">Professional Details</h3>
+              <h3 className="text-[10px] font-medium uppercase tracking-widest text-gray-500 mb-1">Professional Details</h3>
               
-              <div className="rounded-2xl p-4 space-y-3.5" style={{ background: '#1A1F28', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div className="flex justify-between items-center text-sm font-semibold">
-                  <span className="text-[#9099A8] flex items-center gap-1.5"><Briefcase className="w-4 h-4 text-[#F4B400]" /> Specialty</span>
-                  <span className="text-white font-bold">{serviceName}</span>
+              <div className="rounded-2xl p-4 space-y-3.5" style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}>
+                <div className="flex justify-between items-center text-sm font-normal">
+                  <span className="text-gray-500 flex items-center gap-1.5"><Briefcase className="w-4 h-4 text-[#8B5CF6]" /> Specialty</span>
+                  <span className="text-gray-900 font-semibold">{serviceName}</span>
                 </div>
-                <div className="flex justify-between items-center text-sm font-semibold">
-                  <span className="text-[#9099A8] flex items-center gap-1.5"><UserCheck className="w-4 h-4 text-purple-400" /> Experience</span>
-                  <span className="text-white font-bold">{experience} Years</span>
+                <div className="flex justify-between items-center text-sm font-normal">
+                  <span className="text-gray-500 flex items-center gap-1.5"><UserCheck className="w-4 h-4 text-purple-400" /> Experience</span>
+                  <span className="text-gray-900 font-semibold">{experience} Years</span>
                 </div>
-                <div className="flex justify-between items-center text-sm font-semibold">
-                  <span className="text-[#9099A8] flex items-center gap-1.5"><DollarSign className="w-4 h-4 text-[#34D399]" /> Hourly Rate</span>
-                  <span className="text-[#34D399] font-black">₹{price} / hour</span>
+                <div className="flex justify-between items-center text-sm font-normal">
+                  <span className="text-gray-500 flex items-center gap-1.5"><DollarSign className="w-4 h-4 text-[#34D399]" /> Hourly Rate</span>
+                  <span className="text-[#34D399] font-bold">₹{price} / hour</span>
                 </div>
               </div>
 
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#9099A8] mb-1 mt-6">Contact details</h3>
-              <div className="rounded-2xl p-4 space-y-3" style={{ background: '#1A1F28', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div className="flex items-center gap-2.5 text-sm font-semibold text-[#C9CED6]">
-                  <Mail className="w-4 h-4 text-[#9099A8]" />
+              <h3 className="text-[10px] font-medium uppercase tracking-widest text-gray-500 mb-1 mt-6">Contact details</h3>
+              <div className="rounded-2xl p-4 space-y-3" style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}>
+                <div className="flex items-center gap-2.5 text-sm font-normal text-gray-600">
+                  <Mail className="w-4 h-4 text-gray-500" />
                   <span className="truncate">{email}</span>
                 </div>
-                <div className="flex items-center gap-2.5 text-sm font-semibold text-[#C9CED6]">
-                  <Phone className="w-4 h-4 text-[#9099A8]" />
+                <div className="flex items-center gap-2.5 text-sm font-normal text-gray-600">
+                  <Phone className="w-4 h-4 text-gray-500" />
                   <span>{phone}</span>
                 </div>
               </div>
@@ -237,45 +235,45 @@ const DetailsModal = ({ provider, onClose, onVerify, onReject, actionLoading }) 
 
             {/* Column Right: Document Checklist */}
             <div className="space-y-4">
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#9099A8] mb-1">Document Checklist</h3>
+              <h3 className="text-[10px] font-medium uppercase tracking-widest text-gray-500 mb-1">Document Checklist</h3>
               
-              <div className="rounded-2xl p-4 space-y-3" style={{ background: '#1A1F28', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div className="flex items-center gap-3 text-sm text-[#C9CED6]">
+              <div className="rounded-2xl p-4 space-y-3" style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}>
+                <div className="flex items-center gap-3 text-sm text-gray-600">
                   <CheckCircle2 className="w-5 h-5 text-[#34D399] shrink-0" />
                   <div className="flex-1">
-                    <p className="font-bold text-xs text-white">Professional License ID</p>
-                    <p className="text-[10px] text-[#9099A8] font-semibold">Verified Professional Registry</p>
+                    <p className="font-semibold text-xs text-gray-900">Professional License ID</p>
+                    <p className="text-[10px] text-gray-500 font-normal">Verified Professional Registry</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 text-sm text-[#C9CED6]">
+                <div className="flex items-center gap-3 text-sm text-gray-600">
                   <CheckCircle2 className="w-5 h-5 text-[#34D399] shrink-0" />
                   <div className="flex-1">
-                    <p className="font-bold text-xs text-white">Aadhaar Card / UID</p>
-                    <p className="text-[10px] text-[#9099A8] font-semibold">Identity and biometric match</p>
+                    <p className="font-semibold text-xs text-gray-900">Aadhaar Card / UID</p>
+                    <p className="text-[10px] text-gray-500 font-normal">Identity and biometric match</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 text-sm text-[#C9CED6]">
+                <div className="flex items-center gap-3 text-sm text-gray-600">
                   <CheckCircle2 className="w-5 h-5 text-[#34D399] shrink-0" />
                   <div className="flex-1">
-                    <p className="font-bold text-xs text-white">Local Address Proof</p>
-                    <p className="text-[10px] text-[#9099A8] font-semibold">Panchayat Area verified</p>
+                    <p className="font-semibold text-xs text-gray-900">Local Address Proof</p>
+                    <p className="text-[10px] text-gray-500 font-normal">Panchayat Area verified</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 text-sm text-[#C9CED6]">
+                <div className="flex items-center gap-3 text-sm text-gray-600">
                   <CheckCircle2 className="w-5 h-5 text-[#34D399] shrink-0" />
                   <div className="flex-1">
-                    <p className="font-bold text-xs text-white">Police Clearance Cert</p>
-                    <p className="text-[10px] text-[#9099A8] font-semibold">Zero criminal record match</p>
+                    <p className="font-semibold text-xs text-gray-900">Police Clearance Cert</p>
+                    <p className="text-[10px] text-gray-500 font-normal">Zero criminal record match</p>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-2xl p-3.5 flex items-start gap-2.5" style={{ background: 'rgba(244,180,0,0.05)', border: '1px solid rgba(244,180,0,0.15)' }}>
-                <AlertCircle className="w-4 h-4 text-[#F4B400] mt-0.5 shrink-0" />
-                <p className="text-[10px] text-[#9099A8] font-semibold leading-normal">
+              <div className="rounded-2xl p-3.5 flex items-start gap-2.5" style={{ background: 'rgba(244,180,0,0.05)', border: '1px solid rgba(139,92,246,0.15)' }}>
+                <AlertCircle className="w-4 h-4 text-[#8B5CF6] mt-0.5 shrink-0" />
+                <p className="text-[10px] text-gray-500 font-normal leading-normal">
                   Verification ensures security and trust for our community. Clicking approve will immediately authorize this provider to accept bookings on our platform.
                 </p>
               </div>
@@ -293,7 +291,7 @@ const DetailsModal = ({ provider, onClose, onVerify, onReject, actionLoading }) 
                 onClose();
               }}
               disabled={isLoading}
-              className="flex items-center gap-2 px-5 py-3 rounded-2xl transition-all font-bold text-sm disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl transition-all font-medium text-sm disabled:opacity-50"
               style={{ background: 'rgba(239,68,68,0.1)', color: '#F87171', border: '1px solid rgba(239,68,68,0.25)' }}
               onMouseEnter={e => { e.currentTarget.style.background = '#EF4444'; e.currentTarget.style.color = '#fff'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.color = '#F87171'; }}
@@ -308,7 +306,7 @@ const DetailsModal = ({ provider, onClose, onVerify, onReject, actionLoading }) 
               }}
               disabled={isLoading}
               variant="primary"
-              className="flex items-center gap-2 px-6 py-3 text-sm font-bold shadow-md disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-3 text-sm font-semibold shadow-md disabled:opacity-50"
             >
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
               Approve & Verify
@@ -327,11 +325,10 @@ const Toast = ({ message, type, onClose }) => (
     initial={{ opacity: 0, y: 50, scale: 0.9 }}
     animate={{ opacity: 1, y: 0, scale: 1 }}
     exit={{ opacity: 0, y: 50, scale: 0.9 }}
-    className="fixed bottom-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-bold"
+    className="fixed bottom-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-lg border text-sm font-medium bg-white"
     style={{
-      background: type === 'success' ? 'rgba(52,211,153,0.1)' : 'rgba(239,68,68,0.1)',
-      borderColor: type === 'success' ? 'rgba(52,211,153,0.25)' : 'rgba(239,68,68,0.25)',
-      color: type === 'success' ? '#34D399' : '#F87171'
+      borderColor: type === 'success' ? '#D1FAE5' : '#FEE2E2',
+      color: type === 'success' ? '#059669' : '#DC2626'
     }}
   >
     {type === 'success' ? (
@@ -481,12 +478,12 @@ const AdminProviders = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(244,180,0,0.1)', border: '1px solid rgba(244,180,0,0.2)' }}>
-              <ShieldCheck className="w-5 h-5 text-[#F4B400]" />
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)' }}>
+              <ShieldCheck className="w-5 h-5 text-[#8B5CF6]" />
             </div>
-            <h1 className="text-3xl font-black text-white tracking-tight">Provider Verification</h1>
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Provider Verification</h1>
           </div>
-          <p className="text-[#9099A8] text-sm font-semibold ml-13">
+          <p className="text-gray-500 text-sm font-normal ml-13">
             Review and approve pending service providers before they go live. Click a provider card to view full details.
           </p>
         </div>
@@ -494,8 +491,8 @@ const AdminProviders = () => {
         <button
           onClick={handleRefresh}
           disabled={isLoading}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm font-bold disabled:opacity-50 shrink-0"
-          style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)', color: '#9099A8' }}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm font-medium disabled:opacity-50 shrink-0"
+          style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)', color: '#6B7280' }}
           onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
           onMouseLeave={e => { e.currentTarget.style.color = '#9099A8'; e.currentTarget.style.background = '#14181F'; }}
         >
@@ -511,13 +508,13 @@ const AdminProviders = () => {
             icon={Clock}
             label="Awaiting Review"
             value={providers.filter(p => !p.isVerified).length}
-            style={{ background: 'rgba(244,180,0,0.05)', color: '#F4B400', border: '1px solid rgba(244,180,0,0.15)' }}
+            style={{ background: 'rgba(244,180,0,0.05)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.15)' }}
           />
           <StatCard
             icon={Users}
             label="Showing (filtered)"
             value={filtered.length}
-            style={{ background: '#14181F', color: '#9099A8', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={{ background: '#FFFFFF', color: '#6B7280', border: '1px solid rgba(139,92,246,0.08)' }}
           />
           <StatCard
             icon={CheckCircle}
@@ -531,15 +528,14 @@ const AdminProviders = () => {
       {/* Search */}
       {!isLoading && !error && providers.length > 0 && (
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9099A8] w-4 h-4" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
           <input
             type="text"
             placeholder="Search by name or service..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 rounded-xl text-white placeholder-[#4B5563] outline-none transition-all text-sm font-medium shadow-sm"
-            style={{ background: '#1A1F28', border: '1px solid rgba(255,255,255,0.08)' }}
-            onFocus={e => { e.target.style.borderColor = '#F4B400'; e.target.style.boxShadow = '0 0 0 3px rgba(244,180,0,0.12)'; }}
+            className="w-full pl-11 pr-4 py-3 rounded-xl text-gray-900 font-bold placeholder-gray-400 outline-none transition-all text-sm shadow-sm bg-white border border-purple-200"
+            onFocus={e => { e.target.style.borderColor = '#8B5CF6'; e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.12)'; }}
             onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }}
           />
         </div>
@@ -548,10 +544,10 @@ const AdminProviders = () => {
       {/* Content Area */}
       {isLoading ? (
         /* Loading State */
-        <div className="py-24 flex flex-col items-center justify-center rounded-2xl text-[#9099A8] font-medium" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="py-24 flex flex-col items-center justify-center rounded-2xl text-gray-500 font-medium" style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}>
           <div className="relative mb-6">
-            <div className="w-16 h-16 border-2 border-[#F4B400]/20 border-t-[#F4B400] rounded-full animate-spin" />
-            <Loader2 className="w-6 h-6 text-[#F4B400] animate-pulse absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            <div className="w-16 h-16 border-2 border-[#8B5CF6]/20 border-t-[#8B5CF6] rounded-full animate-spin" />
+            <Loader2 className="w-6 h-6 text-[#8B5CF6] animate-pulse absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
           </div>
           <p className="text-sm font-semibold">Loading pending providers...</p>
         </div>
@@ -562,8 +558,8 @@ const AdminProviders = () => {
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
             <AlertTriangle className="w-8 h-8 text-[#F87171]" />
           </div>
-          <h3 className="text-lg font-bold text-white mb-2">Something went wrong</h3>
-          <p className="text-[#9099A8] mb-6 text-sm font-semibold">{error}</p>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Something went wrong</h3>
+          <p className="text-gray-500 mb-6 text-sm font-semibold">{error}</p>
           <GlowButton
             onClick={fetchPendingProviders}
             variant="primary"
@@ -575,14 +571,14 @@ const AdminProviders = () => {
 
       ) : filtered.length === 0 ? (
         /* Empty State */
-        <div className="py-24 flex flex-col items-center justify-center rounded-2xl text-center px-6" style={{ background: '#14181F', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="py-24 flex flex-col items-center justify-center rounded-2xl text-center px-6" style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}>
           <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'rgba(52,211,153,0.05)', border: '1px solid rgba(52,211,153,0.15)' }}>
             <ShieldCheck className="w-10 h-10 text-[#34D399]" />
           </div>
-          <h3 className="text-2xl font-bold text-white mb-3">
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">
             {searchTerm ? 'No results found' : 'All caught up!'}
           </h3>
-          <p className="text-[#9099A8] max-w-sm font-semibold text-sm">
+          <p className="text-gray-500 max-w-sm font-semibold text-sm">
             {searchTerm
               ? `No pending providers match "${searchTerm}". Try a different search.`
               : 'There are no providers awaiting verification right now. Check back later.'}
@@ -591,7 +587,7 @@ const AdminProviders = () => {
             <button
               onClick={() => setSearchTerm('')}
               className="mt-6 px-5 py-2 rounded-xl transition-all text-sm font-bold"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#9099A8' }}
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(139,92,246,0.08)', color: '#6B7280' }}
               onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
               onMouseLeave={e => { e.currentTarget.style.color = '#9099A8'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
             >
@@ -603,7 +599,7 @@ const AdminProviders = () => {
       ) : (
         /* Provider List */
         <div className="space-y-4">
-          <p className="text-xs text-[#9099A8] font-bold uppercase tracking-wider">
+          <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">
             {filtered.length} provider{filtered.length !== 1 ? 's' : ''} awaiting review (Click to view full application details)
           </p>
           <div className="grid grid-cols-1 gap-4">
