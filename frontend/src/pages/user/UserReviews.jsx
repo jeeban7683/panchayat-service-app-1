@@ -7,7 +7,7 @@ const MOCK_REVIEWS = [];
 
 const UserReviews = () => {
   return (
-    <div className="max-w-4xl mx-auto space-y-6 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="w-full space-y-6 pb-8">
       <div>
         <h1 className="text-3xl font-black text-gray-900 tracking-tight">My Reviews</h1>
         <p className="text-gray-500 text-sm mt-1">Manage the reviews you've written for service providers.</p>

@@ -90,7 +90,7 @@ const ProviderJobs = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="w-full space-y-6 pb-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">My Jobs</h1>

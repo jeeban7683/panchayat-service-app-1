@@ -48,11 +48,11 @@ export default function ProviderDashboard() {
   if (isLoading) return <div className="p-10 text-gray-500 font-medium bg-[#F5F3FF] min-h-screen">Loading...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8 bg-[#F5F3FF] min-h-screen">
+    <div className="w-full space-y-6 sm:space-y-8 pb-8">
       {/* HEADER */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight pb-1">Provider Overview</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight pb-1">Provider Overview</h1>
           <p className="text-gray-600 text-sm font-normal">Track your performance and manage incoming requests.</p>
         </div>
         <div className="flex gap-3 flex-wrap">
@@ -69,7 +69,7 @@ export default function ProviderDashboard() {
       </header>
 
       {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
         {stats.map((stat, i) => (
           <div key={i} className="rounded-3xl p-6 flex items-center gap-5 transition-all duration-300 hover:-translate-y-1 bg-white border border-purple-50 shadow-[0_12px_40px_rgba(99,102,241,0.08)]">
             <div className="p-3 rounded-2xl shrink-0" style={{ background: stat.bg }}>

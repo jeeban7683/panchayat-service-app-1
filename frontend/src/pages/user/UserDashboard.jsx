@@ -72,11 +72,11 @@ export default function UserDashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8 bg-[#F5F3FF] min-h-screen">
+    <div className="w-full space-y-6 sm:space-y-8 pb-8">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
             Welcome Back, <span className="text-[#8B5CF6]">{user?.name || 'User'}</span>
           </h1>
           <p className="text-gray-900 text-sm mt-1 font-bold">
@@ -94,7 +94,7 @@ export default function UserDashboard() {
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
         {/* TOTAL BOOKINGS */}
         <div
           className="rounded-3xl p-6 flex items-center gap-5 transition-all duration-300 hover:-translate-y-1 bg-white border border-purple-50 shadow-[0_12px_40px_rgba(99,102,241,0.08)]"

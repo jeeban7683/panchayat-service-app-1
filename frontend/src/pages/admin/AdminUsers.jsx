@@ -92,7 +92,7 @@ const AdminUsers = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-12 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="w-full space-y-6 pb-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -129,7 +129,7 @@ const AdminUsers = () => {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {[
           { label: 'Total Users', value: users.length, style: { background: 'rgba(244,180,0,0.05)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.15)' } },
           { label: 'Providers', value: users.filter(u => u.role === 'PROVIDER').length, style: { background: 'rgba(52,211,153,0.05)', color: '#34D399', border: '1px solid rgba(52,211,153,0.15)' } },

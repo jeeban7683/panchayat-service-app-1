@@ -569,7 +569,7 @@ export default function ChatPage() {
                 onClick={handleSend}
                 disabled={!inputText.trim() || !connected}
                 className="w-10 h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm shrink-0"
-                style={{ background: '#8B5CF6', color: '#000' }}
+                style={{ background: '#8B5CF6', color: '#FFFFFF' }}
               >
                 <Send className="w-4 h-4 font-black" />
               </button>
@@ -586,7 +586,7 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="flex h-[calc(100vh-64px)] rounded-3xl border overflow-hidden shadow-[0_12px_40px_rgba(99,102,241,0.08)] bg-white" style={{ borderColor: 'rgba(139,92,246,0.08)' }}>
+    <div className="flex h-[calc(100vh-6rem)] lg:h-[calc(100vh-5rem)] rounded-2xl sm:rounded-3xl border overflow-hidden shadow-[0_12px_40px_rgba(99,102,241,0.08)] bg-white" style={{ borderColor: 'rgba(139,92,246,0.08)' }}>
       {LeftPanel}
       {RightPanel}
     </div>

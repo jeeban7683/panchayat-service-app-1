@@ -173,9 +173,9 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto w-full pb-12 py-8 px-4 sm:px-6 lg:px-8 bg-[#F5F3FF] min-h-screen">
+    <div className="w-full space-y-6 sm:space-y-8 pb-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6 bg-white p-6 rounded-3xl border border-purple-50 shadow-[0_8px_30px_rgba(99,102,241,0.06)]">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6 bg-white p-4 sm:p-6 rounded-3xl border border-purple-50 shadow-[0_8px_30px_rgba(99,102,241,0.06)]">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mb-1">Command Center</h1>
           <p className="text-gray-500 text-xs sm:text-sm font-normal">Platform-wide monitoring and resource management</p>

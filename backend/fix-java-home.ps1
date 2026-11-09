@@ -1,15 +1,26 @@
-$java21bin = "C:\Users\gochh\.vscode\extensions\redhat.java-1.54.0-win32-x64\jre\21.0.10-win32-x86_64\bin"
-$currentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+$candidates = @(
+    "C:\Users\gochh\AppData\Local\Programs\IntelliJ IDEA Ultimate 2026.1\jbr",
+    "C:\Program Files\Java\latest\jdk-25",
+    "C:\Program Files\Java\jdk-21"
+)
 
-if ($currentPath -notlike "*redhat*") {
-    $newPath = $java21bin + ";" + $currentPath
-    [Environment]::SetEnvironmentVariable("PATH", $newPath, "User")
-    Write-Host "Done: Java 21 added to front of User PATH"
-} else {
-    Write-Host "Java 21 already present in PATH"
+$found = $null
+foreach ($c in $candidates) {
+    if (Test-Path "$c\bin\java.exe") {
+        $found = $c
+        break
+    }
 }
 
-[Environment]::SetEnvironmentVariable("JAVA_HOME", "C:\Users\gochh\.vscode\extensions\redhat.java-1.54.0-win32-x64\jre\21.0.10-win32-x86_64", "User")
-Write-Host "JAVA_HOME set to Java 21"
-Write-Host ""
-Write-Host "Please RESTART your terminal / IDE for changes to take effect."
+if ($found) {
+    [Environment]::SetEnvironmentVariable("JAVA_HOME", $found, "User")
+    $binPath = "$found\bin"
+    $currentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+    if ($currentPath -notlike "*$binPath*") {
+        [Environment]::SetEnvironmentVariable("PATH", "$binPath;$currentPath", "User")
+    }
+    Write-Host "SUCCESS: JAVA_HOME set to: $found" -ForegroundColor Green
+    Write-Host "Java added to User PATH. Please restart your terminal/IDE for changes to take effect."
+} else {
+    Write-Host "No Java JDK found automatically in candidate paths." -ForegroundColor Yellow
+}

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Search, Loader2 } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import { getUserBookings } from '../../services/bookingService';
+import { useAuth } from '../../context/AuthContext';
 
 const getStatusStyle = (status) => {
   switch (status) {
@@ -21,10 +22,7 @@ const getStatusStyle = (status) => {
 };
 
 const BookingHistory = () => {
-  // TEMP FIX
-  const user = { id: 6 };
-  const authLoading = false;
-
+  const { user, loading: authLoading } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -32,24 +30,21 @@ const BookingHistory = () => {
 
   useEffect(() => {
     const fetchBookings = async () => {
-      console.log("Fetching bookings for user:", user);
       if (user?.id) {
         try {
           const response = await getUserBookings(user.id);
-          console.log("Bookings received:", response.data);
-          setBookings(response.data);
+          setBookings(Array.isArray(response.data) ? response.data : []);
         } catch (error) {
           console.error('Failed to fetch bookings:', error);
         } finally {
           setLoading(false);
         }
       } else if (!authLoading) {
-        console.log("No user found");
         setLoading(false);
       }
     };
     fetchBookings();
-  }, []);
+  }, [user?.id, authLoading]);
 
   const filteredBookings = bookings.filter(b => {
     const providerName = b.provider?.user?.name || '';
@@ -65,7 +60,7 @@ const BookingHistory = () => {
     return matchesSearch && matchesStatus;
   });
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4 text-gray-500">
         <Loader2 className="w-10 h-10 text-[#8B5CF6] animate-spin" />
@@ -75,18 +70,18 @@ const BookingHistory = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 py-4 sm:py-8 px-2 sm:px-6 lg:px-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
             Booking History
           </h1>
-          <p className="text-gray-900 text-sm mt-1 font-bold">
+          <p className="text-gray-900 text-xs sm:text-sm mt-1 font-bold">
             View and manage your service bookings.
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row w-full md:w-auto gap-4">
+        <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
             <input
@@ -96,7 +91,7 @@ const BookingHistory = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-4 py-2.5 rounded-xl text-gray-900 font-bold placeholder-gray-400 outline-none transition-all text-sm bg-white border border-purple-200"
               onFocus={e => { e.target.style.borderColor = '#8B5CF6'; e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.12)'; }}
-              onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }}
+              onBlur={e => { e.target.style.borderColor = 'rgba(139,92,246,0.12)'; e.target.style.boxShadow = 'none'; }}
             />
           </div>
         </div>
@@ -121,24 +116,24 @@ const BookingHistory = () => {
                 transition={{ duration: 0.3, delay: idx * 0.05 }}
               >
                 <div
-                  className="p-5 sm:p-6 rounded-2xl transition-all duration-300"
+                  className="p-4 sm:p-6 rounded-2xl transition-all duration-300"
                   style={{
                     background: '#FFFFFF',
                     border: '1px solid rgba(139,92,246,0.08)',
                   }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(139,92,246,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(139,92,246,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}
                 >
-                  <div className="flex flex-col sm:flex-row gap-5 items-start">
-                    <div className="flex items-center gap-4 shrink-0">
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 items-start">
+                    <div className="flex items-center gap-3 sm:gap-4 shrink-0">
                       <div
-                        className="w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-black text-[#8B5CF6]"
+                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-base sm:text-lg font-black text-[#8B5CF6]"
                         style={{ background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)' }}
                       >
                         {booking.provider?.user?.name?.charAt(0) || 'P'}
                       </div>
                       <div>
-                        <h3 className="font-bold text-gray-900">
+                        <h3 className="font-bold text-gray-900 text-sm sm:text-base">
                           {booking.provider?.user?.name}
                         </h3>
                         <p className="text-xs font-bold text-[#8B5CF6] uppercase tracking-wide">
@@ -148,21 +143,21 @@ const BookingHistory = () => {
                     </div>
 
                     <div
-                      className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm mt-3 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 w-full"
-                      style={{ borderColor: 'rgba(255,255,255,0.07)' }}
+                      className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 text-sm mt-3 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 w-full"
+                      style={{ borderColor: 'rgba(139,92,246,0.08)' }}
                     >
                       <div>
-                        <span className="text-[10px] font-extrabold text-gray-900 uppercase tracking-wider block">Requirements</span>
-                        <p className="text-gray-900 font-bold mt-0.5">{booking.requirements || 'None specified'}</p>
+                        <span className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block">Requirements</span>
+                        <p className="text-gray-900 font-semibold text-xs sm:text-sm mt-0.5">{booking.requirements || 'None specified'}</p>
                       </div>
                       <div>
-                        <span className="text-[10px] font-extrabold text-gray-900 uppercase tracking-wider block">Service Address</span>
-                        <p className="text-gray-900 font-bold mt-0.5">{booking.address}</p>
+                        <span className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block">Service Address</span>
+                        <p className="text-gray-900 font-semibold text-xs sm:text-sm mt-0.5">{booking.address}</p>
                       </div>
                       <div className="flex justify-between sm:justify-start items-center sm:items-start gap-4">
                         <div>
                           <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Date & Time</span>
-                          <p className="text-gray-900 font-bold mt-0.5">{booking.date} at {booking.time}</p>
+                          <p className="text-gray-900 font-semibold text-xs sm:text-sm mt-0.5">{booking.date} at {booking.time}</p>
                         </div>
                         <span
                           className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap"

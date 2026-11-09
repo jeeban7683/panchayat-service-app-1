@@ -207,9 +207,12 @@ public class ProviderService {
                     .orElseThrow(() ->
                             new RuntimeException("Provider not found"));
 
-            Path uploadPath = Paths.get(uploadDirectory)
-                    .toAbsolutePath()
-                    .normalize();
+            Path uploadPath;
+            if (uploadDirectory != null && !uploadDirectory.trim().isEmpty() && !uploadDirectory.startsWith("/app")) {
+                uploadPath = Paths.get(uploadDirectory).toAbsolutePath().normalize();
+            } else {
+                uploadPath = Paths.get("uploads", "profile").toAbsolutePath().normalize();
+            }
             // Clear any file-as-folder collisions if a regular file named 'uploads' or 'profile' exists
             Path parentDir = uploadPath.getParent();
             if (parentDir != null && Files.exists(parentDir) && !Files.isDirectory(parentDir)) {

@@ -103,9 +103,9 @@ const AdminAnalytics = () => {
   );
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-12 py-8 px-4 sm:px-6 lg:px-8 bg-[#F5F3FF] min-h-screen">
+    <div className="w-full space-y-6 pb-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl border border-purple-50 shadow-[0_8px_30px_rgba(99,102,241,0.06)]">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 sm:p-6 rounded-3xl border border-purple-50 shadow-[0_8px_30px_rgba(99,102,241,0.06)]">
         <div>
           <div className="flex items-center gap-3 mb-1">
             <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-purple-100 text-[#8B5CF6] shadow-xs">

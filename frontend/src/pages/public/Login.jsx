@@ -189,7 +189,7 @@ export default function Login() {
       >
         {/* Card */}
         <div
-          className="rounded-3xl p-8 sm:p-10 shadow-[0_12px_40px_rgba(99,102,241,0.08)] bg-white border border-purple-50"
+          className="rounded-3xl p-5 sm:p-8 md:p-10 shadow-[0_12px_40px_rgba(99,102,241,0.08)] bg-white border border-purple-50"
         >
 
           {/* Header */}

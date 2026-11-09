@@ -56,7 +56,7 @@ const ProviderEarnings = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 py-8 px-4 sm:px-6 lg:px-8 bg-[#F5F3FF] min-h-screen">
+    <div className="w-full space-y-6 sm:space-y-8 pb-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Earnings</h1>
         <p className="text-gray-500 text-sm font-normal mt-1">Track your financial performance and payouts.</p>

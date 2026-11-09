@@ -296,7 +296,7 @@ const ProviderDetails = () => {
         {/* Back Button */}
         <Link
           to="/providers"
-          className="absolute top-8 left-8 z-20 flex items-center gap-2 px-4 py-2 rounded-xl text-gray-700 bg-white/90 hover:bg-white hover:text-[#8B5CF6] transition-all group border border-purple-100 text-sm font-semibold shadow-sm"
+          className="absolute top-4 left-4 sm:top-8 sm:left-8 z-20 flex items-center gap-2 px-4 py-2 rounded-xl text-gray-700 bg-white/90 hover:bg-white hover:text-[#8B5CF6] transition-all group border border-purple-100 text-sm font-semibold shadow-sm"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span className="text-sm font-semibold">Back to Listing</span>
@@ -385,14 +385,14 @@ const ProviderDetails = () => {
 
             {/* Content Tabs */}
             <div className="mt-8">
-              <div className="flex gap-1 p-1 rounded-xl w-fit mb-6" style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}>
+              <div className="flex flex-wrap gap-1 p-1 rounded-xl w-fit max-w-full overflow-x-auto mb-6" style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}>
                 {['about', 'portfolio', 'reviews'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     className="px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all"
                     style={activeTab === tab
-                      ? { background: '#8B5CF6', color: '#000' }
+                      ? { background: '#8B5CF6', color: '#FFFFFF' }
                       : { color: '#6B7280' }
                     }
                   >
@@ -736,7 +736,7 @@ const ProviderDetails = () => {
               initial={{ scale: 0.95, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 15 }}
-              className="relative w-full max-w-lg border rounded-3xl p-6 md:p-8 shadow-2xl overflow-hidden"
+              className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto border rounded-3xl p-5 sm:p-8 shadow-2xl"
               style={{ background: '#FFFFFF', borderColor: 'rgba(139,92,246,0.08)' }}
             >
               <AnimatePresence mode="wait">

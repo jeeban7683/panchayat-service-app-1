@@ -1,9 +1,8 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
-import Navbar from '../components/shared/Navbar';
-import Sidebar from '../components/shared/Sidebar';
-import Footer from '../components/shared/Footer';
+import PublicLayout from '../layouts/PublicLayout';
+import DashboardLayout from '../layouts/DashboardLayout';
 
 // Public Pages
 import Landing from '../pages/public/Landing';
@@ -55,8 +54,8 @@ const ChatRedirect = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#F5F3FF' }}>
-        <Loader2 className="w-10 h-10 text-[#F4B400] animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F3FF]">
+        <Loader2 className="w-10 h-10 text-[#8B5CF6] animate-spin" />
       </div>
     );
   }
@@ -93,29 +92,6 @@ const ProfileRedirect = () => {
   const roleMap = { ADMIN: '/admin/dashboard', PROVIDER: '/provider/profile', USER: '/user/settings' };
   return <Navigate to={roleMap[user.role] || '/user/settings'} replace />;
 };
-
-const PublicLayout = () => (
-  <div className="min-h-screen flex flex-col" style={{ background: '#F5F3FF' }}>
-    <Navbar />
-    <main className="flex-grow">
-      <Outlet />
-    </main>
-    <div className="relative z-10">
-      <Footer />
-    </div>
-  </div>
-);
-
-const DashboardLayout = ({ role }) => (
-  <div className="min-h-screen flex" style={{ background: '#F5F3FF' }}>
-    <Sidebar role={role} />
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <main className="flex-1 overflow-y-auto p-6 pt-16">
-        <Outlet />
-      </main>
-    </div>
-  </div>
-);
 
 const AppRouter = () => {
   return (

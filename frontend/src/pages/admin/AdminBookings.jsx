@@ -106,7 +106,7 @@ const AdminBookings = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-12 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="w-full space-y-6 pb-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -137,7 +137,7 @@ const AdminBookings = () => {
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm font-medium shrink-0 disabled:opacity-50"
             style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)', color: '#6B7280' }}
             onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#9099A8'; e.currentTarget.style.background = '#14181F'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#9099A8'; e.currentTarget.style.background = '#FFFFFF'; }}
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             Refresh

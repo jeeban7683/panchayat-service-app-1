@@ -166,7 +166,7 @@ const UserSettings = () => {
   );
 
   return (
-    <div className="max-w-6xl mx-auto pb-12 px-4 sm:px-6 lg:px-8 py-8 bg-[#F5F3FF] min-h-screen">
+    <div className="w-full space-y-6 pb-8">
       <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/png, image/jpeg, image/webp" className="hidden" />
 
       <div className="mb-8">
