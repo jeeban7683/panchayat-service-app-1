@@ -147,27 +147,34 @@ const ConversationItem = ({ contact, isActive, onClick }) => {
   return (
     <button
       onClick={() => onClick(contact)}
-      className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all text-left border"
+      className="w-full flex items-center gap-3 px-3 py-2.5 sm:py-3 rounded-2xl transition-all text-left border cursor-pointer hover:bg-purple-50/50"
       style={{
         background: isActive ? 'rgba(139,92,246,0.08)' : 'transparent',
         borderColor: isActive ? 'rgba(139,92,246,0.18)' : 'transparent'
       }}
     >
-      <Avatar name={contact.name} role={contact.role} online={contact.online} image={contact.profileImage || contact.avatar || contact.photoUrl} />
+      <Avatar name={contact.name} role={contact.role} online={contact.online !== false} image={contact.profileImage || contact.avatar || contact.photoUrl} />
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold truncate" style={{ color: isActive ? '#8B5CF6' : '#374151' }}>
+        <div className="flex items-center justify-between gap-1.5">
+          <p className="text-sm font-bold truncate text-gray-900" style={{ color: isActive ? '#7C3AED' : '#111827' }}>
             {contact.name}
           </p>
-          {contact.unreadCount > 0 && (
-            <span className="ml-2 min-w-[20px] h-5 px-1.5 bg-[#8B5CF6] text-white text-[10px] font-bold rounded-full flex items-center justify-center shrink-0">
+          {contact.unreadCount > 0 ? (
+            <span className="min-w-[18px] h-4.5 px-1.5 bg-[#7C3AED] text-white text-[10px] font-black rounded-full flex items-center justify-center shrink-0 shadow-xs">
               {contact.unreadCount}
+            </span>
+          ) : (
+            <span className="text-[10px] text-gray-400 font-medium shrink-0">
+              {contact.online !== false ? 'Online' : ''}
             </span>
           )}
         </div>
-        <div className="flex items-center gap-1 mt-1">
+        <div className="flex items-center justify-between gap-2 mt-0.5">
+          <p className="text-xs text-gray-500 truncate font-normal">
+            {contact.lastMessage || (contact.role === 'PROVIDER' ? 'Service Partner' : contact.role === 'ADMIN' ? 'Support Desk' : 'Resident')}
+          </p>
           <span
-            className="text-[10px] font-bold px-2 py-0.5 rounded-full border"
+            className="text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 border"
             style={{ backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }}
           >
             {contact.role}
@@ -191,6 +198,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterTab, setFilterTab] = useState('All');
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [loadingContacts, setLoadingContacts] = useState(true);
   const [showMobileChat, setShowMobileChat] = useState(false);
@@ -263,9 +271,11 @@ export default function ChatPage() {
   }, [messages]);
 
   // ── Open conversation ─────────────────────────────────────────────────────
-  const openConversation = useCallback(async (contact) => {
+  const openConversation = useCallback(async (contact, isExplicitMobileSelect = true) => {
     setActiveContact(contact);
-    setShowMobileChat(true);
+    if (isExplicitMobileSelect) {
+      setShowMobileChat(true);
+    }
     setLoadingHistory(true);
     setMessages([]);
 
@@ -281,7 +291,7 @@ export default function ChatPage() {
       console.error('Failed to load chat history:', err);
     } finally {
       setLoadingHistory(false);
-      setTimeout(() => inputRef.current?.focus(), 100);
+      setTimeout(() => inputRef.current?.focus(), 150);
     }
   }, [currentUserId]);
 
@@ -330,7 +340,7 @@ export default function ChatPage() {
             (c) => String(c.userId) === String(preselectedContactId)
           );
           if (found) {
-            openConversation(found);
+            openConversation(found, true);
           } else {
             // New chat partner — fetch their info and open conversation
             try {
@@ -344,13 +354,17 @@ export default function ChatPage() {
               };
               allContacts = [newContact, ...allContacts];
               setContacts(allContacts);
-              openConversation(newContact);
+              openConversation(newContact, true);
             } catch (err) {
               console.error('Failed to load preselected contact details:', err);
             }
           }
         } else if (allContacts.length > 0) {
-          openConversation(allContacts[0]);
+          // On desktop (md screens >= 768px), auto-select the first conversation to avoid an empty right panel.
+          // On mobile (< 768px), do NOT auto-open chat: display the WhatsApp-style conversation list by default!
+          if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+            openConversation(allContacts[0], false);
+          }
         }
       } catch (err) {
         console.error('Failed to load contacts:', err);
@@ -393,9 +407,14 @@ export default function ChatPage() {
   };
 
   // ── Filter contacts ───────────────────────────────────────────────────────
-  const filteredContacts = contacts.filter((c) =>
-    c.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredContacts = contacts.filter((c) => {
+    const matchesSearch = c.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    if (!matchesSearch) return false;
+    if (filterTab === 'Unread') return (c.unreadCount || 0) > 0;
+    if (filterTab === 'Providers') return c.role === 'PROVIDER';
+    if (filterTab === 'Admins') return c.role === 'ADMIN';
+    return true;
+  });
 
   // ── Group messages by date ────────────────────────────────────────────────
   const groupedMessages = messages.map((msg, idx) => {
@@ -409,10 +428,10 @@ export default function ChatPage() {
 
   // ── UI: Connection badge ─────────────────────────────────────────────────
   const ConnectionBadge = () => (
-    <div className="flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full border" style={{
+    <div className="flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full border shrink-0" style={{
       background: connected ? 'rgba(52,211,153,0.1)' : 'rgba(239,68,68,0.1)',
       borderColor: connected ? 'rgba(52,211,153,0.25)' : 'rgba(239,68,68,0.25)',
-      color: connected ? '#34D399' : '#F87171'
+      color: connected ? '#059669' : '#DC2626'
     }}>
       {connected
         ? <><Wifi className="w-3 h-3" /> Live</>
@@ -421,31 +440,62 @@ export default function ChatPage() {
     </div>
   );
 
-  // ─── Left Panel ──────────────────────────────────────────────────────────
+  // ─── Left Panel (WhatsApp-style Conversation List) ───────────────────────
   const LeftPanel = (
     <div className={`flex flex-col border-r ${
       showMobileChat ? 'hidden md:flex' : 'flex'
     } w-full md:w-80 lg:w-72 xl:w-80 shrink-0`} style={{ background: '#FFFFFF', borderColor: 'rgba(139,92,246,0.08)' }}>
 
       {/* Header */}
-      <div className="px-4 py-4 border-b" style={{ borderColor: 'rgba(139,92,246,0.08)' }}>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-black text-gray-900">Messages</h2>
+      <div className="px-3.5 py-3 border-b shrink-0" style={{ borderColor: 'rgba(139,92,246,0.08)' }}>
+        <div className="flex items-center justify-between mb-2.5">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-black text-gray-900 tracking-tight">Chats</h2>
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-purple-100 text-[#7C3AED]">
+              {contacts.length}
+            </span>
+          </div>
           <ConnectionBadge />
         </div>
+
         {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+        <div className="relative mb-2.5">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search conversations..."
+            placeholder="Search chats or contacts..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm text-gray-900 font-medium placeholder:text-gray-400 outline-none transition-all rounded-xl"
-            style={{ background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}
-            onFocus={e => { e.target.style.borderColor = '#8B5CF6'; e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.15)'; }}
+            className="w-full pl-9 pr-8 py-2 text-xs sm:text-sm text-gray-900 font-medium placeholder:text-gray-400 outline-none transition-all rounded-xl"
+            style={{ background: '#F9FAFB', border: '1px solid rgba(139,92,246,0.12)' }}
+            onFocus={e => { e.target.style.borderColor = '#8B5CF6'; e.target.style.boxShadow = '0 0 0 2px rgba(139,92,246,0.15)'; }}
             onBlur={e => { e.target.style.borderColor = 'rgba(139,92,246,0.12)'; e.target.style.boxShadow = 'none'; }}
           />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* WhatsApp-style Filter Chips */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+          {['All', 'Unread', 'Providers', 'Admins'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setFilterTab(tab)}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                filterTab === tab
+                  ? 'bg-[#7C3AED] text-white shadow-xs'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -453,17 +503,17 @@ export default function ChatPage() {
       <div className="flex-1 overflow-y-auto p-2">
         {loadingContacts ? (
           <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-            <Loader2 className="w-8 h-8 animate-spin mb-2 text-[#8B5CF6]" />
-            <p className="text-sm font-semibold">Loading conversations...</p>
+            <Loader2 className="w-7 h-7 animate-spin mb-2 text-[#8B5CF6]" />
+            <p className="text-xs sm:text-sm font-semibold">Loading conversations...</p>
           </div>
         ) : filteredContacts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-            <MessageSquare className="w-10 h-10 mb-3 opacity-30 text-[#8B5CF6]" />
-            <p className="text-sm font-bold">No conversations yet</p>
-            <p className="text-xs mt-1 text-center px-4">
-              {currentRole === 'ADMIN'
-                ? 'Wait for users to contact you.'
-                : 'Use "Contact Admin" to start a chat.'}
+          <div className="flex flex-col items-center justify-center py-14 text-gray-500 px-4">
+            <MessageSquare className="w-9 h-9 mb-2 opacity-30 text-[#8B5CF6]" />
+            <p className="text-sm font-bold text-gray-800">No chats found</p>
+            <p className="text-xs mt-1 text-center text-gray-400">
+              {filterTab !== 'All'
+                ? `No ${filterTab.toLowerCase()} conversations at this moment.`
+                : 'Start a new conversation with a verified provider or admin.'}
             </p>
           </div>
         ) : (
@@ -473,7 +523,7 @@ export default function ChatPage() {
                 key={contact.userId}
                 contact={contact}
                 isActive={activeContact?.userId === contact.userId}
-                onClick={openConversation}
+                onClick={(c) => openConversation(c, true)}
               />
             ))}
           </div>
@@ -482,53 +532,65 @@ export default function ChatPage() {
     </div>
   );
 
-  // ─── Right Panel ─────────────────────────────────────────────────────────
+  // ─── Right Panel (Active Chat Window) ──────────────────────────────────
   const RightPanel = (
     <div className={`flex-1 flex flex-col ${
       !showMobileChat ? 'hidden md:flex' : 'flex'
     }`} >
       {!activeContact ? (
         // Empty state
-        <div className="flex-1 flex flex-col items-center justify-center text-gray-500">
-          <div className="w-20 h-20 rounded-3xl flex items-center justify-center mb-5 border" style={{ background: 'rgba(244,180,0,0.05)', borderColor: 'rgba(139,92,246,0.15)' }}>
-            <MessageSquare className="w-9 h-9 text-[#8B5CF6]" />
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-gray-500">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl flex items-center justify-center mb-4 border" style={{ background: 'rgba(139,92,246,0.05)', borderColor: 'rgba(139,92,246,0.15)' }}>
+            <MessageSquare className="w-8 h-8 sm:w-9 sm:h-9 text-[#8B5CF6]" />
           </div>
-          <h3 className="text-lg font-bold text-gray-900 mb-1">Start a Conversation</h3>
-          <p className="text-sm text-center max-w-xs font-semibold">
-            Select a contact from the left to open a chat.
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1">Select a Conversation</h3>
+          <p className="text-xs sm:text-sm text-center max-w-xs text-gray-500 font-medium">
+            Choose a contact from the list on the left to start messaging.
           </p>
+          {showMobileChat && (
+            <button
+              onClick={() => setShowMobileChat(false)}
+              className="md:hidden mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#7C3AED] text-white text-xs font-bold shadow-xs cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" /> Back to Chats
+            </button>
+          )}
         </div>
       ) : (
         <>
           {/* Chat Header */}
-          <div className="border-b px-4 py-3 flex items-center gap-3 shadow-sm shrink-0" style={{ background: '#FFFFFF', borderColor: 'rgba(139,92,246,0.08)' }}>
+          <div className="border-b px-3 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2.5 sm:gap-3 shadow-xs shrink-0" style={{ background: '#FFFFFF', borderColor: 'rgba(139,92,246,0.08)' }}>
             <button
-              className="md:hidden p-1.5 text-gray-500 hover:text-white rounded-lg"
+              className="md:hidden p-2 -ml-1 text-gray-700 hover:text-[#7C3AED] hover:bg-purple-50 rounded-xl transition-colors cursor-pointer"
               onClick={() => setShowMobileChat(false)}
+              aria-label="Back to chat list"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
             </button>
-            <Avatar name={activeContact.name} role={activeContact.role} online size="md" image={activeContact.avatar || activeContact.profileImage || activeContact.photoUrl} />
+            <Avatar name={activeContact.name} role={activeContact.role} online={activeContact.online !== false} size="md" image={activeContact.avatar || activeContact.profileImage || activeContact.photoUrl} />
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-gray-900 text-sm truncate">{activeContact.name}</p>
-              <p className="text-xs text-gray-500">{activeContact.role}</p>
+              <p className="font-bold text-gray-900 text-sm sm:text-base truncate leading-snug">{activeContact.name}</p>
+              <p className="text-[11px] text-gray-500 font-medium truncate flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0" />
+                <span>{activeContact.role} · Active now</span>
+              </p>
             </div>
             <ConnectionBadge />
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-4 py-4">
+          <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 bg-[#FAF9FF]/40">
             {loadingHistory ? (
               <div className="flex items-center justify-center h-full text-gray-500">
                 <Loader2 className="w-7 h-7 animate-spin text-[#8B5CF6]" />
               </div>
             ) : messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                <div className="w-14 h-14 rounded-2xl border flex items-center justify-center mb-3" style={{ background: '#FFFFFF', borderColor: 'rgba(139,92,246,0.08)' }}>
-                  <MessageSquare className="w-6 h-6 text-gray-500" />
+                <div className="w-12 h-12 rounded-2xl border flex items-center justify-center mb-2.5 bg-white" style={{ borderColor: 'rgba(139,92,246,0.1)' }}>
+                  <MessageSquare className="w-5 h-5 text-gray-400" />
                 </div>
                 <p className="text-sm font-bold text-gray-900">No messages yet</p>
-                <p className="text-xs mt-1 font-medium">Say hello! 👋</p>
+                <p className="text-xs mt-0.5 text-gray-500">Say hello! 👋</p>
               </div>
             ) : (
               <div className="space-y-0.5 max-w-3xl mx-auto">
@@ -549,7 +611,7 @@ export default function ChatPage() {
           </div>
 
           {/* Input Bar */}
-          <div className="border-t px-4 py-3 shrink-0" style={{ background: '#FFFFFF', borderColor: 'rgba(139,92,246,0.08)' }}>
+          <div className="border-t px-3 sm:px-4 py-2.5 sm:py-3 shrink-0 bg-white" style={{ borderColor: 'rgba(139,92,246,0.08)' }}>
             <div className="flex items-end gap-2 max-w-3xl mx-auto">
               <div className="flex-1 relative">
                 <textarea
@@ -559,23 +621,23 @@ export default function ChatPage() {
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Type a message..."
-                  className="w-full px-4 py-2.5 text-sm text-gray-900 font-semibold placeholder:text-gray-400 outline-none transition-all resize-none leading-relaxed rounded-2xl"
-                  style={{ maxHeight: '120px', background: '#FFFFFF', border: '1px solid rgba(139,92,246,0.08)' }}
-                  onFocus={e => { e.target.style.borderColor = '#8B5CF6'; e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.15)'; }}
-                  onBlur={e => { e.target.style.borderColor = 'rgba(139,92,246,0.1)'; e.target.style.boxShadow = 'none'; }}
+                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm text-gray-900 font-medium placeholder:text-gray-400 outline-none transition-all resize-none leading-relaxed rounded-2xl bg-gray-50"
+                  style={{ maxHeight: '110px', border: '1px solid rgba(139,92,246,0.12)' }}
+                  onFocus={e => { e.target.style.borderColor = '#8B5CF6'; e.target.style.boxShadow = '0 0 0 2px rgba(139,92,246,0.15)'; }}
+                  onBlur={e => { e.target.style.borderColor = 'rgba(139,92,246,0.12)'; e.target.style.boxShadow = 'none'; }}
                 />
               </div>
               <button
                 onClick={handleSend}
                 disabled={!inputText.trim() || !connected}
-                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm shrink-0"
-                style={{ background: '#8B5CF6', color: '#FFFFFF' }}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-xs shrink-0 cursor-pointer"
+                style={{ background: '#7C3AED', color: '#FFFFFF' }}
               >
                 <Send className="w-4 h-4 font-black" />
               </button>
             </div>
             {!connected && (
-              <p className="text-center text-xs text-red-400 mt-1.5 font-bold">
+              <p className="text-center text-[11px] text-red-500 mt-1 font-bold">
                 ⚡ Connecting to server... Messages will send when connected.
               </p>
             )}
@@ -586,7 +648,7 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] lg:h-[calc(100vh-5rem)] rounded-2xl sm:rounded-3xl border overflow-hidden shadow-[0_12px_40px_rgba(99,102,241,0.08)] bg-white" style={{ borderColor: 'rgba(139,92,246,0.08)' }}>
+    <div className="flex h-[calc(100dvh-5.5rem)] sm:h-[calc(100vh-5.5rem)] lg:h-[calc(100vh-5rem)] rounded-xl sm:rounded-2xl lg:rounded-3xl border overflow-hidden shadow-xs sm:shadow-sm bg-white" style={{ borderColor: 'rgba(139,92,246,0.1)' }}>
       {LeftPanel}
       {RightPanel}
     </div>

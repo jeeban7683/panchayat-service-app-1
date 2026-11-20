@@ -136,7 +136,7 @@ export default function GradientHeroSection({ className }) {
   };
 
   return (
-    <div className={cn('bg-[#F5F3FF] min-h-[calc(100vh-4rem)] flex flex-col justify-between pb-6 text-gray-900 overflow-x-hidden', className)}>
+    <div className={cn('bg-[#F5F3FF] min-h-0 sm:min-h-[calc(100vh-4rem)] flex flex-col justify-between pb-6 text-gray-900 overflow-x-hidden', className)}>
 
       {/* Location header */}
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 flex items-center justify-between">
@@ -270,10 +270,12 @@ export default function GradientHeroSection({ className }) {
                       key={item.name}
                       className={cn(
                         'absolute transition-all duration-500 ease-out flex items-center justify-center',
-                        isActive ? 'z-20 opacity-100 scale-100' : 'z-10 opacity-70 scale-90 pointer-events-none'
+                        isActive
+                          ? 'z-20 opacity-100 scale-100'
+                          : 'z-10 max-sm:opacity-0 max-sm:pointer-events-none opacity-60 sm:opacity-75 scale-90 pointer-events-none'
                       )}
                       style={{
-                        transform: `translateX(${offset * 125}px) scale(${isActive ? 1 : 0.88})`,
+                        transform: `translateX(${offset * 135}px) scale(${isActive ? 1 : 0.88})`,
                       }}
                       onClick={() => {
                         if (didSwipe) {
